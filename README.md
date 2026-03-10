@@ -8,27 +8,24 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=flat&logo=pytorch&logoColor=white)](https://pytorch.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Built at HORIZON 1.0 · VCET, Vasai Road**
-
-*"Mumbai commuters lose 91 hours/year to traffic. We give back 40."*
-
----
+Built at HORIZON 1.0 — VCET, Vasai Road
 
 </div>
 
+---
+
 ## Table of Contents
 
-- [Problem Statement](#-problem-statement)
-- [Solution Overview](#-solution-overview)
-- [Screenshots](#-screenshots)
-- [Tech Stack](#-tech-stack)
-- [System Architecture](#-system-architecture)
-- [Data Pipeline](#-data-pipeline)
-- [ML Models](#-ml-models)
-- [Model Evaluation Metrics](#-model-evaluation-metrics)
-- [API Endpoints](#-api-endpoints)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
+- [Problem Statement](#problem-statement)
+- [Solution Overview](#solution-overview)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [System Architecture](#system-architecture)
+- [Data Pipeline](#data-pipeline)
+- [ML Models](#ml-models)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
 
 ---
 
@@ -40,261 +37,246 @@ Urban commuters in Mumbai face daily mobility challenges that existing navigatio
 |---|---|
 | Unpredictable traffic congestion | 91 hours lost per commuter per year (INRIX 2023) |
 | No advance departure guidance | Commuters leave at wrong times, hitting peak traffic |
-| Reactive-only navigation apps | Apps like Google Maps react *after* congestion forms |
-| Parking uncertainty | Commuters waste 15–20 min searching for parking |
-| No unified mobility intelligence | Weather, events, routes, and parking are all separate |
+| Reactive-only navigation apps | Apps like Google Maps react after congestion forms, not before |
+| Parking uncertainty | Commuters waste 15-20 minutes searching for available spots |
+| No unified mobility view | Weather, events, routes, and parking exist as separate silos |
 
-> **Core insight:** Every existing navigation system is *reactive*. We built a system that is *predictive* — it tells you what will happen hours before it does.
+Every existing navigation system is reactive. UrbanNav AI is predictive — it tells you what will happen hours before it does.
 
 ---
 
 ## Solution Overview
 
-UrbanNav AI is a full-stack predictive mobility platform with four integrated AI modules:
+UrbanNav AI is a full-stack predictive mobility platform with four integrated modules:
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     UrbanNav AI                         │
-├──────────────┬──────────────┬──────────────┬────────────┤
-│  🚦 Traffic  │  ⏰ Departure │  🅿️  Parking  │  🧠 Person │
-│  Forecasting │  Planning    │  Intelligence│  -alization│
-│  LSTM Neural │  Multi-window│  Statistical │ Collabor-  │
-│  Network     │  Scorer      │  Predictor   │ ative Filter│
-└──────────────┴──────────────┴──────────────┴────────────┘
-```
-
-- **Traffic Forecasting** — LSTM model predicts congestion up to 7 hours ahead across 25 Mumbai routes
-- **Smart Departure Planning** — Evaluates 18 departure windows and recommends optimal leave time relative to your arrival target
-- **Parking Intelligence** — Predicts availability across 50 Mumbai parking lots before you arrive
-- **Personalized Learning** — Collaborative filtering learns commute patterns from user trip history
+- **Traffic Forecasting** — LSTM neural network predicts congestion up to 7 hours ahead across 25 Mumbai routes
+- **Smart Departure Planning** — Evaluates 18 departure windows and recommends the optimal time to leave relative to your arrival target
+- **Parking Intelligence** — Statistical model predicts availability across 50 Mumbai parking lots before you arrive
+- **Personalized Learning** — Collaborative filtering builds on user trip history to surface personalized departure and route preferences
 
 ---
 
-##  Screenshots
+
 
 ### Plan Trip — Departure Recommendations
-> Select origin, destination, and arrival time. The AI evaluates 18 departure windows and ranks them by congestion, travel time, and arrival precision.
+
+<!-- After saving your screenshot, replace the block below with:
+![Plan Trip Tab](docs/screenshots/plan-trip.png)
+-->
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  PLAN MY TRIP                                                   │
-│  From: Andheri Station West  ▾    To: BKC  ▾                  │
-│  Arrive by: 9:00 AM  ▾            Distance (km): 15            │
-│  ☐ Major event today (IPL/concert)                              │
-│  ⚡ Plan My Trip                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  DEPARTURE RECOMMENDATIONS                                      │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  OPTION 1 ⭐                                             │   │
-│  │  07:50 AM    → ETA 08:45 AM · 55min travel              │   │
-│  │  BEST   46% cong   +15min buffer            97%  CONF   │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  OPTION 2                                               │   │
-│  │  08:10 AM    → ETA 09:05 AM · 55min travel              │   │
-│  │  GOOD   46% cong   +5min buffer             83%  CONF   │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  OPTION 3                                               │   │
-│  │  08:30 AM    → ETA 09:43 AM · 73min travel              │   │
-│  │  AVOID  87% cong   +32min delay             68%  CONF   │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+screenshots/plan-trip.png
 ```
 
-### Traffic Forecast Chart
-> 7-hour congestion forecast. Colour-coded: 🟢 LOW · 🟡 MODERATE · 🟠 HIGH · 🔴 SEVERE
+### 7-Hour Traffic Forecast
+
+<!-- After saving your screenshot, replace the block below with:
+![Forecast Chart](docs/screenshots/forecast-chart.png)
+-->
 
 ```
-  100% ┤
-   80% ┤              ██████  ██████
-   60% ┤  ██████      ██████  ██████  ██████
-   40% ┤  ██████      ██████  ██████  ██████  ██████
-   20% ┤  ██████      ██████  ██████  ██████  ██████  ██████
-       └──────────────────────────────────────────────────────
-        7AM     8AM     9AM    10AM    11AM    12PM    1PM
-         🟡      🔴      🔴      🟠      🟡      🟡      🟢
+screenshots/forecast-chart.png
 ```
 
 ### Live Traffic — All 25 Routes
 
+<!-- After saving your screenshot, replace the block below with:
+![Live Traffic Tab](docs/screenshots/live-traffic.png)
+-->
+
 ```
-┌──────┬──────────────────────────────────┬──────────────┬───────┬──────────┐
-│  ID  │  Route Name                      │  Zone        │  Cong │  Level   │
-├──────┼──────────────────────────────────┼──────────────┼───────┼──────────┤
-│ R014 │ BKC Internal Roads               │ BKC          │  92%  │ SEVERE   │
-│ R012 │ Western Railway Road — Dadar     │ Central Mum  │  91%  │ SEVERE   │
-│ R002 │ SV Road (Dahisar–Bandra)         │ West Suburbs │  84%  │ HIGH     │
-│ R001 │ Western Express Highway          │ West Suburbs │  73%  │ HIGH     │
-│ R021 │ Palm Beach Road                  │ Navi Mumbai  │  44%  │ MODERATE │
-│ R024 │ Khopoli Road — Panvel            │ Outskirts    │  22%  │ LOW      │
-└──────┴──────────────────────────────────┴──────────────┴───────┴──────────┘
+screenshots/live-traffic.png
 ```
 
 ### Parking Intelligence
 
+<!-- After saving your screenshot, replace the block below with:
+![Parking Tab](docs/screenshots/parking.png)
+-->
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  FIND PARKING NEAR: BKC   Arrive: 9:00 AM                      │
-│  4 lots found within 1.5km                                      │
-├─────────────────────────────────────────────────────────────────┤
-│  ⭐ BKC Parking Lot 1    2min walk  0.15km     23%  LIMITED     │
-│     BKC Parking Lot 2    5min walk  0.40km     38%  LIMITED     │
-│     BKC Community Park   8min walk  0.65km     55%  AVAILABLE   │
-│     Nearest Mall Parking 12min walk 0.85km     68%  AVAILABLE   │
-├─────────────────────────────────────────────────────────────────┤
-│  Normal Day vs IPL Match Day (BKC 7PM)                         │
-│  BKC Lot 1:  55% → 12%   BKC Lot 2:  38% → 8%                 │
-└─────────────────────────────────────────────────────────────────┘
+screenshots/parking.png
 ```
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
+
 | Technology | Version | Purpose |
 |---|---|---|
-| **Python** | 3.10+ | Core language |
-| **FastAPI** | 0.104+ | REST API framework |
-| **Uvicorn** | 0.24+ | ASGI server |
-| **PyTorch** | 2.0+ | LSTM neural network training & inference |
-| **NumPy** | 1.24+ | Numerical computation |
-| **Pandas** | 2.0+ | Data processing & feature engineering |
-| **scikit-learn** | 1.3+ | StandardScaler, metrics, preprocessing |
-| **SQLite** | built-in | User data & trip history storage |
+| Python | 3.10+ | Core language |
+| FastAPI | 0.104+ | REST API framework |
+| Uvicorn | 0.24+ | ASGI server |
+| PyTorch | 2.0+ | LSTM neural network training and inference |
+| NumPy | 1.24+ | Numerical computation |
+| Pandas | 2.0+ | Data processing and feature engineering |
+| scikit-learn | 1.3+ | StandardScaler and preprocessing utilities |
+| SQLite | built-in | User profiles and trip history storage |
 
 ### Frontend
+
 | Technology | Purpose |
 |---|---|
-| **HTML5 / CSS3** | Dashboard layout and styling |
-| **Vanilla JavaScript** | Client-side logic, API calls, state management |
-| **Chart.js 4.4** | Congestion forecast bar charts, zone comparisons |
-| **Google Fonts** | Space Grotesk + JetBrains Mono |
+| HTML5 / CSS3 | Dashboard layout and styling |
+| Vanilla JavaScript | Client-side logic, API calls, state management |
+| Chart.js 4.4 | Congestion forecast bar charts and zone comparisons |
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         CLIENT (Browser)                                 │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────────────────┐     │
-│  │  Plan Trip   │   │ Live Traffic │   │  Parking Intelligence    │     │
-│  │     Tab      │   │     Tab      │   │          Tab             │     │
-│  └──────┬───────┘   └──────┬───────┘   └────────────┬─────────────┘     │
-│         └──────────────────┼───────────────────────── ┘                  │
-└────────────────────────────┼─────────────────────────────────────────────┘
-                             │ HTTP / REST
-┌────────────────────────────▼─────────────────────────────────────────────┐
-│                      FastAPI Backend  (:8000)                            │
-│  ┌──────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐ │
-│  │  /api/forecast/* │  │ /api/departure/ │  │  /api/parking/*         │ │
-│  │  15 endpoints    │  │ plan            │  │  /api/users/*           │ │
-│  └────────┬─────────┘  └────────┬────────┘  └──────────┬──────────────┘ │
-│           └────────────────────┼──────────────────────── ┘               │
-│  ┌────────────────────────────▼──────────────────────────────────────┐   │
-│  │                     Core ML Layer                                  │   │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  │   │
-│  │  │  Statistical │  │  Departure   │  │ Parking  │  │Personal  │  │   │
-│  │  │  Predictor   │  │  Planner     │  │  Intel   │  │ -ization │  │   │
-│  │  └──────┬───────┘  └──────┬───────┘  └────┬─────┘  └────┬─────┘  │   │
-│  │         └────────────────┼──────────────── ┘              │        │   │
-│  │  ┌────────────────────────▼──────────────────────────────── ▼──┐   │   │
-│  │  │         mumbai_routes.py                                      │   │   │
-│  │  │  25 routes · 50 parking lots · 9 zones · haversine lookup   │   │   │
-│  │  └───────────────────────────────────────────────────────────────┘   │   │
-│  └────────────────────────────────────────────────────────────────────┘   │
-│  ┌───────────────────────────────────────────────────────────────────┐    │
-│  │  Optional LSTM (lstm_traffic.pt)  │  SQLite (urban_nav.db)        │    │
-│  └───────────────────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────────────────┘
+                        CLIENT (Browser)
+          ┌──────────────┬──────────────┬────────────────┐
+          │  Plan Trip   │ Live Traffic │    Parking     │
+          │     Tab      │     Tab      │      Tab       │
+          └──────┬───────┴──────┬───────┴───────┬────────┘
+                 └──────────────┴───────────────┘
+                                │ HTTP / REST
+                                ▼
+               FastAPI Backend  (localhost:8000)
+          ┌─────────────────────────────────────────────┐
+          │  /api/forecast/*                            │
+          │  /api/departure/plan                        │
+          │  /api/parking/*                             │
+          │  /api/users/*                               │
+          └───────────────────┬─────────────────────────┘
+                              │
+          ┌───────────────────▼─────────────────────────┐
+          │               Core ML Layer                  │
+          │                                              │
+          │  predictor.py        departure_planner.py   │
+          │  Statistical         18-window scorer        │
+          │  additive model                              │
+          │                                              │
+          │  parking_intelligence.py  personalization.py │
+          │  Statistical occupancy    Collaborative       │
+          │  predictor                filtering          │
+          │                                              │
+          │  lstm_traffic.py  (optional, if trained)     │
+          │  PyTorch LSTM     multi-horizon forecast      │
+          └───────────────────┬─────────────────────────┘
+                              │
+          ┌───────────────────▼─────────────────────────┐
+          │              mumbai_routes.py                │
+          │  25 routes, 50 parking lots, 9 zones        │
+          │  Haversine nearest-route/lot lookup          │
+          └──────────────────────────────────────────────┘
+
+          ┌─────────────────┐    ┌──────────────────────┐
+          │ SQLite          │    │ OpenWeatherMap API   │
+          │ urban_nav.db    │    │ (optional, .env key) │
+          └─────────────────┘    └──────────────────────┘
 ```
 
-### Request Flow — `POST /api/departure/plan`
+### Request Flow — POST /api/departure/plan
 
 ```
-User clicks "Plan My Trip"
-        │
-        ▼
-POST { origin, destination, lat/lng, arrival_hour, distance_km, has_event }
-        │
-        ▼
-nearest_routes(origin_lat, origin_lng) → closest of 25 routes
-        │
-        ▼
-Build 18 departure windows (every 10 min across 3-hour search range)
+User submits: origin, destination, lat/lng, arrival_hour,
+              distance_km, has_event
+
+nearest_routes(origin_lat, origin_lng)
+  └── finds closest route from 25 options using haversine distance
+
+Build 18 departure windows (every 10 min, across 3-hour search range):
   For each window:
     predict_congestion(route_id, hour, dow, weather_code, has_event)
     _travel_minutes(congestion, distance_km, base_speed)
     _score(congestion, buffer_min, delay_min, normal_min)
-        │
-        ▼
-Normalise scores → 52–97 range
-Pick top 3 spread ≥20 min apart, sort by score descending
-        │
-        ▼
-Return { recommendations[3], all_windows[18], search_window }
+
+Normalise scores: worst window = 52, best window = 97
+Pick top 3 windows spread at least 20 min apart
+Sort by score descending (rank 1 = best)
+
+Return: recommendations[3], all_windows[18], search_window
 ```
 
 ---
 
 ## Data Pipeline
 
+### Stage 1 — Synthetic Data Generation
+
+File: `data/generate_synthetic_data.py`
+
+Generates 60 days x 25 routes x 24 hours = 36,000 records.
+
+Each record contains:
+
+| Column | Description |
+|---|---|
+| timestamp | datetime of observation |
+| route_id | R001–R025 |
+| zone | one of 9 Mumbai zones |
+| road_type | expressway / highway / arterial / local |
+| hour | 0–23 |
+| day_of_week | 0 (Monday) – 6 (Sunday) |
+| congestion_pct | 0–100, target variable |
+| speed_kmh | derived from congestion |
+| weather_code | 0=clear, 1=rain, 2=storm, 3=fog |
+| has_event | boolean (IPL, concerts, local festivals) |
+
+Realism factors applied during generation:
+
+- Mumbai peak hours modelled: 7–10 AM and 5–9 PM
+- Zone multipliers: BKC 1.25x, Navi Mumbai 0.80x
+- Road type scaling: expressway = 0.45x arterial congestion
+- Weekend reduction: Saturday -18 pts, Sunday -28 pts
+- Monsoon storm impact: +28 congestion points
+- Event uplift: +20 to +30 pts in event-adjacent zones
+- Gaussian noise added per record for variation
+
+Output: `data/processed/mumbai_traffic_history.csv`
+
+### Stage 2 — Feature Engineering (LSTM only)
+
+File: `backend/models/lstm_traffic.py` — `build_features()`
+
+| Feature | How it is created |
+|---|---|
+| hour_sin, hour_cos | Cyclic encoding: sin/cos(2*pi*hour/24) |
+| dow_sin, dow_cos | Cyclic encoding: sin/cos(2*pi*dow/7) |
+| congestion_pct | StandardScaler: mean=0, std=1 |
+| weather_code | Raw integer 0–3 |
+| has_event | Boolean cast to float |
+| zone_encoded | LabelEncoder |
+| road_type_encoded | LabelEncoder |
+
+Total features per timestep: 7
+
+### Stage 3 — Sequence Creation (LSTM only)
+
+Sliding window over time-sorted records:
+
 ```
-STAGE 1 — SYNTHETIC DATA GENERATION
-──────────────────────────────────────────────────────────────────
- generate_synthetic_data.py
-
- Output: 60 days × 25 routes × 24 hours = 36,000 records
-
- Each record:
-   timestamp, route_id, zone, road_type, hour, day_of_week,
-   congestion_pct (target), speed_kmh, weather_code, has_event
-
- Realism factors:
-   ✓ Mumbai peak hours: 7–10 AM and 5–9 PM
-   ✓ Zone multipliers: BKC 1.25×, Navi Mumbai 0.80×
-   ✓ Road type: expressway = 0.45× arterial congestion
-   ✓ Weekend drop: Sat −18 pts, Sun −28 pts
-   ✓ Monsoon impact: +28 pts during storms
-   ✓ Event uplift: +20–30 pts near event zones
-   ✓ Gaussian noise: ±5% per record
-
-STAGE 2 — FEATURE ENGINEERING
-──────────────────────────────────────────────────────────────────
- Raw columns → 7 engineered features per timestep:
-
-   hour_sin / hour_cos     Cyclic encoding sin/cos(2π·hour/24)
-   dow_sin  / dow_cos      Cyclic encoding sin/cos(2π·dow/7)
-   congestion_pct          StandardScaler (mean=0, std=1)
-   weather_code            Raw integer 0–3
-   has_event               Boolean → float
-   zone_encoded            LabelEncoder
-   road_type_encoded       LabelEncoder
-
-STAGE 3 — SEQUENCE CREATION
-──────────────────────────────────────────────────────────────────
- Sliding window:
-   Input  X : [batch, seq_len=24, features=7]  ← last 24 hours
-   Target y : [batch, 3]                        ← +1h, +3h, +6h
-
- Train / Val split: 85% / 15%
-   Time-based split (NOT random) → prevents data leakage
-
-STAGE 4 — INFERENCE
-──────────────────────────────────────────────────────────────────
- Path A — Statistical Predictor (always available, no training):
-   congestion = base × type_scale × 100
-              + zone_offset + day_offset + route_offset
-              + weather_offset + event_offset
-   → clipped to [2, 97]
-
- Path B — LSTM Predictor (if lstm_traffic.pt exists):
-   Loads saved PyTorch weights + StandardScaler
-   24-hour sequence → predicts +1h, +3h, +6h simultaneously
+Input  X: [batch, seq_len=24, features=7]   last 24 hours as context
+Target y: [batch, 3]                         congestion at +1h, +3h, +6h
 ```
+
+Train / Val split: 85% / 15%, time-based (not random). Time-based split prevents data leakage — the validation set only contains records that come after all training records chronologically.
+
+### Stage 4 — Inference
+
+Two parallel prediction paths:
+
+**Path A — Statistical Predictor** (always active, no training required):
+
+```python
+pct = HOURLY_BASE[hour] * TYPE_SCALE[road_type] * 100
+    + ZONE_ADD[zone]           # BKC: +10, Navi Mumbai: -8
+    + DAY_ADJUST[day_of_week]  # Monday: +8, Saturday: -18, Sunday: -28
+    + ROUTE_OFFSET[route_id]   # per-route calibration
+    + WEATHER_ADD[weather]     # rain: +12, storm: +28, fog: +10
+    + EVENT_ADD                # +28 if event and high-impact zone
+
+congestion = clip(pct, 2, 97)
+```
+
+**Path B — LSTM Predictor** (active only if `lstm_traffic.pt` exists after training):
+
+Loads saved PyTorch model and StandardScaler, feeds 24-hour sequence, outputs +1h / +3h / +6h congestion simultaneously.
 
 ---
 
@@ -302,37 +284,38 @@ STAGE 4 — INFERENCE
 
 ### Model Inventory
 
-| # | Model | File | Purpose | Input | Output |
-|---|---|---|---|---|---|
-| 1 | **LSTM Neural Network** | `lstm_traffic.py` | Multi-horizon traffic congestion forecasting | 24h × 7 features | Congestion % at +1h, +3h, +6h |
-| 2 | **Statistical Additive Predictor** | `predictor.py` | Real-time congestion for any route/time | route_id, hour, dow, weather, event | Congestion % (0–100) |
-| 3 | **Statistical Parking Predictor** | `parking_intelligence.py` | Parking availability across 50 lots | lot metadata, hour, dow, weather, event | Availability % per lot |
-| 4 | **Departure Window Scorer** | `departure_planner.py` | Rank departure windows by congestion + timing | 18 windows + arrival target | Scored & ranked windows |
-| 5 | **Collaborative Filter** | `personalization.py` | User trip personalization | Trip history vectors | Similar users, preference scores |
+| # | Model | File | Type | Purpose |
+|---|---|---|---|---|
+| 1 | LSTM Neural Network | `lstm_traffic.py` | PyTorch (trained) | Multi-horizon traffic congestion forecasting |
+| 2 | Statistical Additive Predictor | `predictor.py` | Rule-based statistical | Real-time congestion for any route, time, and condition |
+| 3 | Statistical Parking Predictor | `parking_intelligence.py` | Rule-based statistical | Parking availability across 50 lots |
+| 4 | Departure Window Scorer | `departure_planner.py` | Scoring + normalisation | Rank 18 departure windows by congestion and arrival timing |
+| 5 | Collaborative Filter | `personalization.py` | Cosine similarity | User personalization from trip history |
 
 ---
 
 ### Model 1 — LSTM Traffic Forecaster
 
 **Architecture:**
+
 ```
 Input      [batch, seq_len=24, features=7]
-    │
-LSTM L1    hidden_size=128, dropout=0.2
-    │
+    |
+LSTM L1    hidden_size=128, num_layers=2, dropout=0.2
+    |
 LSTM L2    hidden_size=128
-    │
-Attention  Linear(128→64) → Tanh → Linear(64→1) → Softmax
-    │      weighted sum across 24 timesteps
-    │
-FC L1      Linear(128→64) + ReLU + Dropout(0.2)
-    │
-FC L2      Linear(64→3)
-    │
+    |
+Attention  Linear(128->64) -> Tanh -> Linear(64->1) -> Softmax
+           weighted sum across the 24 input timesteps
+    |
+FC L1      Linear(128->64) + ReLU + Dropout(0.2)
+    |
+FC L2      Linear(64->3)
+    |
 Output     [congestion_+1h, congestion_+3h, congestion_+6h]
 ```
 
-**Training Config:**
+**Training configuration:**
 
 | Parameter | Value |
 |---|---|
@@ -344,66 +327,71 @@ Output     [congestion_+1h, congestion_+3h, congestion_+6h]
 | Batch size | 64 |
 | Epochs | 30 |
 | Learning rate | 0.001 |
-| Optimizer | Adam (weight_decay=1e-5) |
+| Optimizer | Adam, weight_decay=1e-5 |
 | Loss function | HuberLoss |
-| LR Scheduler | ReduceLROnPlateau (patience=5) |
-| Train/Val split | 85% / 15% (time-based) |
+| LR Scheduler | ReduceLROnPlateau, patience=5 |
+| Train/Val split | 85% / 15%, time-based |
 
-**Why LSTM?** Traffic is sequential — congestion at 9 AM depends on what happened at 7 and 8 AM. LSTM's gating mechanism learns which historical hours are relevant for each forecast horizon. A feedforward model treats each timestep independently and misses these patterns.
+**Why LSTM:** Traffic is a time series where current congestion depends on the previous several hours. LSTM's gating mechanism (forget, input, output gates) learns which historical timesteps are relevant for each forecast horizon. A feedforward model treats each hour independently and misses these temporal patterns.
 
-**Why HuberLoss?** Traffic data has outliers (accidents, events). MSE penalizes them quadratically and distorts training. Huber Loss is quadratic for small errors and linear for large ones — stable gradients without ignoring real outliers.
+**Why HuberLoss:** Traffic data contains genuine outliers such as accidents and sudden events. Mean squared error penalizes these quadratically and distorts the learned weights. HuberLoss is quadratic for small errors and linear for large ones, giving stable gradients without ignoring real anomalies.
 
 ---
 
 ### Model 2 — Statistical Additive Predictor
 
-Works without training — instant realistic predictions at startup.
+Designed to work without any training step. Delivers deterministic, calibrated predictions at startup.
 
 **Formula:**
+
 ```
-pct = HOURLY_BASE[hour] × TYPE_SCALE[road_type] × 100
-    + ZONE_ADD[zone]          # BKC: +10, Navi Mumbai: −8
-    + DAY_ADJUST[dow]         # Mon: +8, Sat: −18, Sun: −28
-    + ROUTE_OFFSET[route_id]  # per-route personality
-    + WEATHER_ADD[weather]    # rain: +12, storm: +28, fog: +10
-    + EVENT_ADD               # +28 if event and zone in [BKC, Central, South]
+pct = HOURLY_BASE[hour] * TYPE_SCALE[road_type] * 100
+    + ZONE_ADD[zone]
+    + DAY_ADJUST[day_of_week]
+    + ROUTE_OFFSET[route_id]
+    + WEATHER_ADD[weather_code]
+    + EVENT_ADD (if applicable)
 
 congestion = clip(pct, 2, 97)
 ```
 
-**Why additive, not multiplicative?** Multiplicative stacking causes blowup — at BKC peak: `0.78 × 1.25 × 1.30 × 1.12 = 1.42` clips everything to 100. The additive model keeps all values in realistic range.
+**Why additive, not multiplicative:** An earlier multiplicative version stacked zone, type, and day multipliers. At BKC during Monday peak this produced `0.78 * 1.25 * 1.30 * 1.12 = 1.42`, which clips to 100 for almost every high-demand combination, making all predictions indistinguishable. The additive model keeps values in the realistic 2–97 range across all conditions.
 
 ---
 
-### Model 3 — Parking Availability Predictor
+### Model 3 — Statistical Parking Predictor
 
-**Occupancy Estimation:**
-```
-occupancy = HOURLY_OCC[hour]        # 0.02 at 2AM → 0.91 at 5PM
-          × ZONE_PARK_MULT[zone]    # BKC: 1.30×, Navi Mumbai: 0.80×
-          × LOT_TYPE_MULT[type]     # station: 1.20×, airport: 0.70×
-          × DAY_MULT[dow]           # weekday: 1.0×, Sunday: 0.70×
-          × WEATHER_MULT            # rain: 1.15× (people avoid walking)
-          × EVENT_MULT              # has_event: 1.40× near event zones
+**Occupancy formula:**
 
-availability_pct = clip((1 − occupancy) × 100, 3, 97)
 ```
+occupancy = HOURLY_OCC[hour]
+          * ZONE_PARK_MULT[zone]      # BKC: 1.30, Navi Mumbai: 0.80
+          * LOT_TYPE_MULT[lot_type]   # station: 1.20, airport: 0.70
+          + weather_adjustment        # rain reduces driving
+          + event_adjustment          # IPL/concert adds demand
+          + capacity_adjustment       # large lots fill more slowly
+          + deterministic_noise       # per lot-id hash, stable per request
+
+availability_pct = clip((1 - occupancy) * 100, 0, 100)
+```
+
+Lot types recognized: airport, mall, hospital, station, default.
 
 ---
 
 ### Model 4 — Departure Window Scorer
 
-**Scoring formula:**
-```
-raw = 0.40 × timing_score      # arriving 5–20 min early = 100, late = 0
-    + 0.35 × congestion_score  # (1 − congestion/100) × 100
-    + 0.25 × delay_score       # (2.0 − delay_ratio) × 100
+**Scoring formula per window:**
 
-# Normalise: worst window → 52%,  best window → 97%
-score = 52 + (raw − raw_min) / (raw_max − raw_min) × 45
+```
+raw = 0.40 * timing_score      # 5-20 min early = 100, late = 0
+    + 0.35 * congestion_score  # (1 - congestion/100) * 100
+    + 0.25 * delay_score       # (2.0 - delay_ratio) * 100
+
+normalised = 52 + (raw - raw_min) / (raw_max - raw_min) * 45
 ```
 
-**Why normalise?** Without it, all peak-hour windows score 20–40, giving users no clear recommendation. Normalisation ensures *the best available option always scores 97%* even in bad conditions.
+Normalisation maps the lowest-scoring window in the search to 52 and the best to 97. Without this, all peak-hour windows score in the 20–40 range and no clear recommendation emerges.
 
 ---
 
@@ -411,107 +399,57 @@ score = 52 + (raw − raw_min) / (raw_max − raw_min) × 45
 
 **Method:** User-User Cosine Similarity
 
-**User feature vector (6 dimensions):**
+**Feature vector per user (6 dimensions):**
+
 ```
 [ avg_departure_hour, avg_congestion_tolerance,
   preferred_route_encoded, avg_travel_minutes,
   avg_parking_walk_tolerance, trip_frequency ]
 ```
 
-**Similarity threshold:** > 0.7 = "similar commuter"
+Users with cosine similarity above 0.7 are surfaced as similar commuters. Their preferred departure times and routes are used to generate personalized suggestions for new users on the same corridor.
 
 ---
 
-## 📊 Model Evaluation Metrics
-
-### LSTM — Traffic Forecasting
-
-| Metric | +1h Horizon | +3h Horizon | +6h Horizon |
-|---|---|---|---|
-| **MAE** (Mean Absolute Error) | ~8 % pts | ~14 % pts | ~19 % pts |
-| **RMSE** | ~11 % pts | ~18 % pts | ~24 % pts |
-| **Directional Accuracy** | ~91% | ~87% | ~82% |
-
-> At 1-hour horizon, predictions are within ±8 percentage points of actual congestion on average. For BKC 8AM peak (~90%), the model predicts 82–98% — correctly capturing the SEVERE severity band.
->
-> Directional accuracy measures whether congestion is predicted to rise or fall correctly — the most actionable signal for departure planning.
-
-**Typical training progress:**
-```
-Epoch  1: Train=0.180  Val=0.162  MAE 1h:22.4  3h:28.1  6h:34.7
-Epoch  5: Train=0.095  Val=0.089  MAE 1h:15.3  3h:20.8  6h:26.2  ✅
-Epoch 10: Train=0.061  Val=0.058  MAE 1h:11.2  3h:16.4  6h:21.8  ✅
-Epoch 15: Train=0.043  Val=0.041  MAE 1h: 9.1  3h:14.7  6h:20.1  ✅
-Epoch 20: Train=0.034  Val=0.035  MAE 1h: 8.4  3h:14.1  6h:19.4  ✅
-Epoch 25: Train=0.029  Val=0.032  MAE 1h: 8.1  3h:13.9  6h:19.2  ✅
-Epoch 30: Train=0.026  Val=0.031  MAE 1h: 7.9  3h:13.8  6h:19.0  ✅
-```
-
-### Statistical Predictor — Range Validation
-
-| Condition | System Predicts | Real Mumbai Range | Status |
-|---|---|---|---|
-| BKC, 9AM Monday | 90–95% | 88–95% | ✅ |
-| WEH Highway, 8AM | 70–78% | 68–80% | ✅ |
-| Bandra-Worli Sea Link, 8AM | 35–45% | 30–45% | ✅ |
-| Palm Beach Navi Mumbai, 9AM | 40–50% | 35–50% | ✅ |
-| Any route, 2AM | 2–8% | 2–10% | ✅ |
-| Any route, Sunday 10AM | 28–42% | 25–45% | ✅ |
-
-### Parking Predictor
-
-| Metric | Value |
-|---|---|
-| **Availability class accuracy** | ~88% (AVAILABLE / LIMITED / FULL) |
-| **MAE (availability %)** | ~9 % pts across 50 lots |
-| **Event-day surge capture** | ✅ IPL/concert +40% demand modelled |
-
-### Departure Planner
-
-| Metric | Value |
-|---|---|
-| Windows evaluated per request | 18 |
-| Confidence score range | 52%–97% (normalised) |
-| Minimum spread between options | ≥20 minutes |
-| Avg response time | <50ms (statistical model) |
-
----
-
-## 🌐 API Endpoints
+## API Endpoints
 
 ### Traffic
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/forecast/all-routes` | Congestion for all 25 routes |
-| `GET` | `/api/forecast/zones` | Summary across 9 zones |
-| `GET` | `/api/forecast/by-location?lat=&lng=` | Any Mumbai coordinates |
-| `GET` | `/api/forecast/area-comparison` | 8 key areas side-by-side |
-| `GET` | `/api/forecast/{route_id}` | Specific route R001–R025 |
-| `GET` | `/api/weather` | Weather + congestion impact code |
+| GET | /api/forecast/all-routes | Congestion for all 25 routes |
+| GET | /api/forecast/zones | Summary across all 9 zones |
+| GET | /api/forecast/by-location?lat=&lng= | Predictions for any Mumbai coordinates |
+| GET | /api/forecast/area-comparison | Side-by-side comparison of 8 key areas |
+| GET | /api/forecast/{route_id} | Full forecast for a specific route R001–R025 |
+| GET | /api/weather | Current Mumbai weather with congestion impact code |
 
 ### Trip Planning
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/departure/plan` | Ranked departure recommendations |
+| POST | /api/departure/plan | Ranked departure recommendations |
 
 ### Parking
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/parking/predict` | Availability near destination |
-| `GET` | `/api/parking/lots?zone=` | All 50 lots, filterable |
-| `GET` | `/api/parking/by-location?lat=&lng=` | Parking near coordinates |
+| POST | /api/parking/predict | Availability near destination coordinates |
+| GET | /api/parking/lots?zone= | All 50 lots, filterable by zone |
+| GET | /api/parking/by-location?lat=&lng= | Parking near any Mumbai coordinates |
 
-### Routes & Users
+### Routes and Users
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/routes?zone=` | All 25 routes, filterable |
-| `GET` | `/api/nearest-routes?lat=&lng=` | Closest routes to point |
-| `POST` | `/api/users/create` | Create user profile |
-| `GET` | `/api/users/{id}/profile` | Profile + insights |
-| `POST` | `/api/users/log-trip` | Log completed trip |
-| `GET` | `/api/users/{id}/similar` | Find similar commuters |
+| GET | /api/routes?zone= | All 25 routes, filterable by zone |
+| GET | /api/nearest-routes?lat=&lng= | Closest routes to a coordinate |
+| POST | /api/users/create | Create a user profile |
+| GET | /api/users/{id}/profile | Profile and personalized insights |
+| POST | /api/users/log-trip | Log a completed trip |
+| GET | /api/users/{id}/similar | Find similar commuters |
 
-**Interactive docs:** `http://localhost:8000/docs`
+Interactive API docs: `http://localhost:8000/docs`
 
 ---
 
@@ -519,39 +457,47 @@ Epoch 30: Train=0.026  Val=0.031  MAE 1h: 7.9  3h:13.8  6h:19.0  ✅
 
 ```
 urban_nav/
-│
-├── start.py                          ← Run this to start everything
-├── setup_and_run.py                  ← First-time setup + train + start
-├── test_all_apis.py                  ← API test suite
-├── requirements.txt
-├── .env                              ← API keys (OpenWeather, TomTom)
-│
-├── data/
-│   ├── generate_synthetic_data.py    ← 36,000-record Mumbai dataset generator
-│   └── processed/
-│       └── mumbai_traffic_history.csv
-│
-├── backend/
-│   ├── api/
-│   │   └── main.py                   ← FastAPI app (15+ endpoints)
-│   │
-│   ├── models/
-│   │   ├── predictor.py              ← Statistical additive predictor
-│   │   ├── lstm_traffic.py           ← PyTorch LSTM + training pipeline
-│   │   ├── parking_intelligence.py   ← 50-lot parking predictor
-│   │   ├── personalization.py        ← SQLite + collaborative filtering
-│   │   ├── mumbai_routes.py          ← 25 routes, 50 lots, haversine
-│   │   └── saved/
-│   │       ├── lstm_traffic.pt       ← Trained weights (auto-generated)
-│   │       └── scaler.pkl
-│   │
-│   └── services/
-│       ├── departure_planner.py      ← 18-window departure scorer
-│       ├── weather_service.py        ← OpenWeatherMap integration
-│       └── tomtom_collector.py       ← Optional live data collector
-│
-└── frontend/
-    └── index.html                    ← Complete single-file dashboard
+|
+|-- start.py                          run this to start the API server
+|-- setup_and_run.py                  first-time setup: install, generate data, train, start
+|-- test_all_apis.py                  test suite for all endpoints
+|-- requirements.txt
+|-- .env                              API keys (OpenWeather, TomTom)
+|-- README.md
+|
+|-- data/
+|   |-- generate_synthetic_data.py    generates 36,000-record Mumbai dataset
+|   `-- processed/
+|       `-- mumbai_traffic_history.csv
+|
+|-- backend/
+|   |-- api/
+|   |   `-- main.py                   FastAPI application, 15+ endpoints
+|   |
+|   |-- models/
+|   |   |-- predictor.py              statistical additive predictor (Model 2)
+|   |   |-- lstm_traffic.py           PyTorch LSTM architecture and training (Model 1)
+|   |   |-- parking_intelligence.py   statistical parking predictor (Model 3)
+|   |   |-- personalization.py        SQLite schema and collaborative filtering (Model 5)
+|   |   |-- mumbai_routes.py          master data: 25 routes, 50 lots, haversine lookup
+|   |   `-- saved/
+|   |       |-- lstm_traffic.pt       trained LSTM weights, generated on first train run
+|   |       `-- scaler.pkl            StandardScaler fitted on training data
+|   |
+|   `-- services/
+|       |-- departure_planner.py      18-window departure scorer (Model 4)
+|       |-- weather_service.py        OpenWeatherMap API integration
+|       `-- tomtom_collector.py       optional live traffic data collector
+|
+|-- frontend/
+|   `-- index.html                    complete single-file dashboard
+|
+`-- docs/
+    `-- screenshots/                  add your screenshots here for the README
+        |-- plan-trip.png
+        |-- forecast-chart.png
+        |-- live-traffic.png
+        `-- parking.png
 ```
 
 ---
@@ -559,8 +505,9 @@ urban_nav/
 ## Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- ~500MB disk space (PyTorch)
+
+- Python 3.10 or higher
+- Approximately 500 MB free disk space for PyTorch
 
 ### Quick Start
 
@@ -573,26 +520,35 @@ pip install -r requirements.txt
 python start.py
 ```
 
-Then open `frontend/index.html` in your browser.
+Open `frontend/index.html` in your browser.
 
-- **API:** `http://localhost:8000`
-- **Docs:** `http://localhost:8000/docs`
+- API server: `http://localhost:8000`
+- Interactive API docs: `http://localhost:8000/docs`
 
-### First-Time Full Setup (trains LSTM)
+The system works immediately without training. The statistical predictor (Model 2) runs at startup with no model files required.
+
+### First-Time Full Setup (includes LSTM training)
 
 ```bash
 python setup_and_run.py
 ```
 
-Installs dependencies → generates dataset → trains LSTM (~5 min) → seeds demo users → starts server.
+This will:
+1. Install all dependencies
+2. Generate the 36,000-record synthetic dataset
+3. Train the LSTM model (approximately 5 minutes on CPU)
+4. Seed the database with three demo users and trip history
+5. Start the API server
 
-### Train LSTM Only
+### Train the LSTM Separately
 
 ```bash
 python -m backend.models.lstm_traffic
 ```
 
-### Test All Endpoints
+Trained model saves to `backend/models/saved/lstm_traffic.pt`.
+
+### Run the API Test Suite
 
 ```bash
 python test_all_apis.py
@@ -609,25 +565,32 @@ python test_all_apis.py
 | Parking lots | 50 |
 | Training records | 36,000 |
 | Forecast horizon | 7 hours |
-| Departure windows evaluated | 18 per request |
+| Departure windows evaluated per request | 18 |
 
-**Zones:** Western Suburbs · Eastern Suburbs · Central Mumbai · BKC · South Mumbai · Thane · Central Connector · Navi Mumbai · Outskirts
+Zones: Western Suburbs, Eastern Suburbs, Central Mumbai, BKC, South Mumbai, Thane, Central Connector, Navi Mumbai, Outskirts
 
 ---
 
 ## Requirements
 
 ```
-fastapi uvicorn[standard] torch numpy pandas
-scikit-learn requests geopy python-dotenv schedule pydantic
+fastapi
+uvicorn[standard]
+torch
+numpy
+pandas
+scikit-learn
+requests
+geopy
+python-dotenv
+schedule
+pydantic
 ```
 
 ---
 
 <div align="center">
 
-**UrbanNav AI** · HORIZON 1.0 · VCET Vasai Road
-
-*Predict. Plan. Move Smarter.*
+UrbanNav AI — HORIZON 1.0 — VCET Vasai Road
 
 </div>
