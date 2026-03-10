@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanNav AI — Full Mumbai Coverage</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--bg:#07090f;--panel:#0f1623;--panel2:#161e2e;--border:rgba(99,179,237,0.10);
+--accent:#63b3ed;--green:#48bb78;--orange:#ed8936;--red:#fc8181;--yellow:#f6e05e;
+--purple:#b794f4;--text:#e2e8f0;--muted:#718096;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;}
+nav{background:rgba(15,22,35,0.98);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+    padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.tabs{display:flex;gap:3px;background:var(--panel2);padding:3px;border-radius:8px;}
+.tab{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;white-space:nowrap;}
+.tab.active{background:var(--accent);color:#07090f;}
+.app{display:grid;grid-template-columns:370px 1fr;min-height:calc(100vh - 52px);}
+.sidebar{border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(100vh - 52px);}
+.main{padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(100vh - 52px);}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.ct{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ct::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px;flex-shrink:0;}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;transition:border-color .2s;}
+input:focus,select:focus{border-color:var(--accent);}
+.fr{margin-bottom:9px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;}
+.btn{width:100%;padding:10px;background:var(--accent);color:#07090f;border:none;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;}
+.btn:hover{background:#90cdf4;transform:translateY(-1px);}
+.btn.loading{opacity:.6;cursor:wait;}
+.zr{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--panel2);border-radius:6px;border-left:3px solid transparent;margin-bottom:4px;}
+.zr.LOW{border-color:var(--green);}.zr.MODERATE{border-color:var(--yellow);}.zr.HIGH{border-color:var(--orange);}.zr.SEVERE{border-color:var(--red);}
+.zn{font-size:12px;font-weight:600;}.zs{font-size:10px;color:var(--muted);}
+.zc{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;}
+.zc.LOW{color:var(--green);}.zc.MODERATE{color:var(--yellow);}.zc.HIGH{color:var(--orange);}.zc.SEVERE{color:var(--red);}
+.dc{background:var(--panel2);border-radius:8px;padding:11px 13px;border:1px solid var(--border);display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;margin-bottom:7px;}
+.dc.r1{border-color:rgba(72,187,120,.5);background:rgba(72,187,120,.04);}
+.dc.r2{border-color:rgba(99,179,237,.25);}
+.dt{font-size:21px;font-family:'JetBrains Mono',monospace;font-weight:600;}
+.de{font-size:11px;color:var(--muted);margin-top:1px;}
+.dconf{text-align:center;background:rgba(99,179,237,.08);border-radius:6px;padding:6px 10px;min-width:58px;}
+.dnum{font-size:19px;font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700;}
+.dlbl{font-size:8px;color:var(--muted);letter-spacing:1px;}
+.dm{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+.tg{font-size:9px;padding:2px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.05);color:var(--muted);}
+.tg.best{background:rgba(72,187,120,.12);color:var(--green);}
+.tg.warn{background:rgba(237,137,54,.12);color:var(--orange);}
+.tg.late{background:rgba(252,129,129,.12);color:var(--red);}
+.pk{background:var(--panel2);border-radius:6px;padding:9px 11px;display:grid;grid-template-columns:1fr auto;align-items:center;margin-bottom:5px;}
+.pk.pri{border:1px solid rgba(99,179,237,.3);background:rgba(99,179,237,.04);border-radius:8px;}
+.pn{font-size:12px;font-weight:600;}.ps{font-size:10px;color:var(--muted);margin-top:1px;}
+.pa{text-align:right;font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:600;}
+.pa.AVAILABLE{color:var(--green);}.pa.LIMITED{color:var(--yellow);}.pa.FULL{color:var(--red);}
+.pb{font-size:9px;text-align:right;letter-spacing:1px;}
+.pb.AVAILABLE{color:var(--green);}.pb.LIMITED{color:var(--yellow);}.pb.FULL{color:var(--red);}
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.sc{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:11px;}
+.sv{font-size:25px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent);}
+.sl{font-size:10px;color:var(--muted);margin-top:1px;}
+.rt{width:100%;border-collapse:collapse;font-size:11px;}
+.rt th{text-align:left;padding:5px 8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.rt td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.03);}
+.rt tr:hover td{background:rgba(255,255,255,.02);}
+.lb{font-size:8px;padding:2px 5px;border-radius:2px;letter-spacing:1px;font-weight:600;}
+.lb.LOW{background:rgba(72,187,120,.15);color:var(--green);}
+.lb.MODERATE{background:rgba(246,224,94,.15);color:var(--yellow);}
+.lb.HIGH{background:rgba(237,137,54,.15);color:var(--orange);}
+.lb.SEVERE{background:rgba(252,129,129,.15);color:var(--red);}
+.cw{position:relative;height:160px;}
+.ib{background:rgba(183,148,244,.06);border:1px solid rgba(183,148,244,.2);border-radius:8px;padding:11px;font-size:12px;line-height:1.6;}
+.il{font-size:9px;letter-spacing:2px;color:var(--purple);margin-bottom:5px;font-family:'JetBrains Mono',monospace;}
+.ws{display:flex;align-items:center;gap:9px;background:var(--panel2);border-radius:8px;padding:8px 11px;}
+.empty{text-align:center;padding:20px;color:var(--muted);font-size:12px;}
+.ei{font-size:26px;margin-bottom:5px;}
+.sp{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sc2{overflow-y:auto;max-height:320px;}
+.sc2::-webkit-scrollbar{width:3px;}
+.sc2::-webkit-scrollbar-thumb{background:var(--accent);}
+.mode-badge{font-size:9px;padding:2px 7px;border-radius:2px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+.mode-badge.demo{background:rgba(237,137,54,.15);color:var(--orange);border:1px solid rgba(237,137,54,.3);}
+.mode-badge.live{background:rgba(72,187,120,.15);color:var(--green);border:1px solid rgba(72,187,120,.3);}
+.divider{border:none;border-top:1px solid var(--border);margin:8px 0;}
+@media(max-width:900px){.app{grid-template-columns:1fr;}.sr{grid-template-columns:1fr 1fr;}.tc{grid-template-columns:1fr;}}
+
+/* ── Arrive-by time picker ─────────────────────────── */
+.time-picker{display:flex;gap:6px;align-items:center;}
+.time-picker input[type=number]{
+  width:54px;background:var(--panel2);border:1px solid var(--border);
+  color:var(--text);padding:8px 6px;border-radius:6px;
+  font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;
+  text-align:center;outline:none;transition:border-color .2s;
+  -moz-appearance:textfield;appearance:textfield;
+}
+.time-picker input[type=number]::-webkit-inner-spin-button,
+.time-picker input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.time-picker input[type=number]:focus{border-color:var(--accent);}
+.time-picker .sep{color:#666;font-size:16px;font-weight:700;line-height:1;}
+.time-picker select.ampm{
+  width:64px;background:var(--panel2);border:1px solid var(--border);
+  color:var(--text);padding:8px 4px;border-radius:6px;
+  font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;
+  outline:none;cursor:pointer;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none;
+  text-align:center;
+}
+.time-picker select.ampm:focus{border-color:var(--accent);}
+
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><div class="logo-dot"></div>UrbanNav <span style="color:var(--muted);font-weight:400">AI</span></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('plan')">🗺️ Plan Trip</div>
+    <div class="tab" onclick="switchTab('live')">📡 Live Traffic</div>
+    <div class="tab" onclick="switchTab('park')">🅿️ Parking</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="modeBadge" class="mode-badge demo">CONNECTING...</span>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace;"><div class="pulse"></div>LIVE</div>
+  </div>
+</nav>
+
+<div class="app">
+  <div class="sidebar" id="sb"></div>
+  <div class="main"    id="mn"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// STATE — single source of truth
+// ════════════════════════════════════════════════════════════════
+const S = {
+  apiOnline: false,
+  apiUrl:    "http://localhost:8000",
+  weather:   null,
+  currentTab: "plan",
+};
+
+// ════════════════════════════════════════════════════════════════
+// BACKEND DETECTION
+// ════════════════════════════════════════════════════════════════
+async function detectBackend() {
+  try {
+    const r = await fetch(S.apiUrl + "/", { signal: AbortSignal.timeout(2500) });
+    if (!r.ok) throw new Error();
+    await r.json();
+    S.apiOnline = true;
+    const b = document.getElementById("modeBadge");
+    b.textContent = "LIVE API";
+    b.className = "mode-badge live";
+    console.log("✅ Backend connected at", S.apiUrl);
+  } catch {
+    S.apiOnline = false;
+    const b = document.getElementById("modeBadge");
+    b.textContent = "DEMO MODE";
+    b.className = "mode-badge demo";
+    console.log("⚠️ Backend offline — showing demo data. Run: python start.py");
+  }
+}
+
+async function api(path, opts = {}) {
+  if (!S.apiOnline) return null;
+  try {
+    const r = await fetch(S.apiUrl + path, { signal: AbortSignal.timeout(8000), ...opts });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } catch (e) {
+    console.warn("API error:", path, e.message);
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// MUMBAI LOCATION DATA
+// Every location has: name, lat, lng, zone, congestion profile
+// congestion = base % at peak hour for this specific zone/type
+// ════════════════════════════════════════════════════════════════
+const LOCS = [
+  // Western Suburbs
+  {n:"Andheri Station West",  la:19.1197,lo:72.8463,z:"Western Suburbs", pk:82, rid:"R002"},
+  {n:"Borivali Station",      la:19.2288,lo:72.8558,z:"Western Suburbs", pk:72, rid:"R002"},
+  {n:"Malad West",            la:19.1866,lo:72.8479,z:"Western Suburbs", pk:68, rid:"R003"},
+  {n:"Goregaon East",         la:19.1534,lo:72.8618,z:"Western Suburbs", pk:70, rid:"R001"},
+  {n:"Santacruz West",        la:19.0896,lo:72.8518,z:"Western Suburbs", pk:75, rid:"R002"},
+  // Eastern Suburbs
+  {n:"Kurla Station",         la:19.0728,lo:72.8826,z:"Eastern Suburbs", pk:78, rid:"R006"},
+  {n:"Ghatkopar Metro",       la:19.0861,lo:72.9081,z:"Eastern Suburbs", pk:74, rid:"R007"},
+  {n:"Powai",                 la:19.1136,lo:72.9060,z:"Eastern Suburbs", pk:62, rid:"R005"},
+  {n:"Mulund West",           la:19.1688,lo:72.9559,z:"Eastern Suburbs", pk:65, rid:"R009"},
+  {n:"Chembur",               la:19.0522,lo:72.8999,z:"Eastern Suburbs", pk:72, rid:"R015"},
+  // Thane
+  {n:"Thane Station",         la:19.1890,lo:72.9650,z:"Thane",           pk:68, rid:"R007"},
+  {n:"Ghodbunder Road Thane", la:19.2183,lo:72.9781,z:"Thane",           pk:62, rid:"R008"},
+  // Central Mumbai
+  {n:"Dadar TT",              la:19.0178,lo:72.8478,z:"Central Mumbai",  pk:91, rid:"R012"},
+  {n:"Lower Parel",           la:18.9945,lo:72.8286,z:"Central Mumbai",  pk:84, rid:"R013"},
+  {n:"Bandra West",           la:19.0544,lo:72.8403,z:"Central Mumbai",  pk:78, rid:"R002"},
+  {n:"Worli",                 la:19.0076,lo:72.8176,z:"Central Mumbai",  pk:82, rid:"R019"},
+  // BKC
+  {n:"BKC",                   la:19.0631,lo:72.8677,z:"BKC",             pk:95, rid:"R014"},
+  // South Mumbai
+  {n:"Churchgate",            la:18.9322,lo:72.8264,z:"South Mumbai",    pk:88, rid:"R020"},
+  {n:"CST / Fort",            la:18.9400,lo:72.8356,z:"South Mumbai",    pk:86, rid:"R020"},
+  {n:"Nariman Point",         la:18.9255,lo:72.8242,z:"South Mumbai",    pk:82, rid:"R017"},
+  {n:"Colaba",                la:18.9067,lo:72.8147,z:"South Mumbai",    pk:78, rid:"R017"},
+  // Navi Mumbai
+  {n:"Vashi",                 la:19.0771,lo:73.0108,z:"Navi Mumbai",     pk:44, rid:"R021"},
+  {n:"Belapur CBD",           la:19.0190,lo:73.0381,z:"Navi Mumbai",     pk:38, rid:"R023"},
+  {n:"Nerul",                 la:19.0369,lo:73.0169,z:"Navi Mumbai",     pk:36, rid:"R022"},
+  {n:"Airoli",                la:19.1549,lo:72.9987,z:"Navi Mumbai",     pk:40, rid:"R025"},
+  // Outskirts
+  {n:"Panvel",                la:18.9894,lo:73.1175,z:"Outskirts",       pk:22, rid:"R024"},
+];
+
+function getLoc(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return LOCS[0];
+  const idx = sel.selectedIndex;
+  const opt = sel.options[idx];
+  const locIdx = parseInt(opt.dataset.idx);
+  return LOCS[locIdx];
+}
+
+function locSelect(id, defaultName, triggerDist = false) {
+  const zones = {};
+  LOCS.forEach((l, i) => { (zones[l.z] = zones[l.z] || []).push({ ...l, idx: i }); });
+  const onChange = triggerDist ? ' onchange="updateDistanceBanner()"' : '';
+  let html = `<select id="${id}"${onChange}>`;
+  for (const [zone, locs] of Object.entries(zones)) {
+    html += `<optgroup label="── ${zone} ──">`;
+    locs.forEach(l => {
+      html += `<option value="${l.n}" data-idx="${l.idx}" ${l.n === defaultName ? "selected" : ""}>${l.n}</option>`;
+    });
+    html += `</optgroup>`;
+  }
+  return html + `</select>`;
+}
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function updateDistanceBanner() {
+  const origLoc = getLoc("oSel");
+  const destLoc = getLoc("dSel");
+  const el = document.getElementById("distText");
+  if (!origLoc || !destLoc || !el) return;
+  if (origLoc.n === destLoc.n) {
+    el.innerHTML = `<span style="color:#ff6b6b">⚠️ Origin and destination are the same</span>`;
+    return;
+  }
+  const straight = haversineKm(origLoc.la, origLoc.lo, destLoc.la, destLoc.lo);
+  const road = straight * 1.15;
+  el.innerHTML = `<strong style="color:#4ade80;font-size:15px">${road.toFixed(1)} km</strong>&nbsp;<span style="color:#888">road distance &nbsp;·&nbsp; ${straight.toFixed(1)} km straight line</span>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// PREDICTION ENGINE (client-side, location-aware, deterministic)
+// Mirrors the Python predictor logic — gives real different values
+// per location, time, and conditions.
+// ════════════════════════════════════════════════════════════════
+
+// Hour-of-day base pattern (0–100 scale)
+const HOURLY = [4,3,2,3,6,14,38,62,78,72,55,48,52,55,51,58,68,80,82,74,58,40,24,11];
+
+// Day-of-week additive offset (% points)
+const DAY_ADD = {0:8, 1:4, 2:0, 3:0, 4:3, 5:-18, 6:-28};
+
+// Zone additive offset
+const ZONE_ADD = {
+  "BKC":10, "Central Mumbai":9, "South Mumbai":7,
+  "Western Suburbs":6, "Eastern Suburbs":4,
+  "Thane":-3, "Central Connector":2,
+  "Navi Mumbai":-8, "Outskirts":-14
+};
+
+// Route-specific personality offsets
+const ROUTE_ADD = {
+  R001:3, R002:2, R003:1, R004:2, R005:-2,
+  R006:2, R007:3, R008:1, R009:-1, R010:-2,
+  R011:-10, R012:5, R013:5, R014:6, R015:2,
+  R016:-8, R017:2, R018:2, R019:3, R020:5,
+  R021:-7, R022:-5, R023:-3, R024:-12, R025:-4
+};
+
+const ROAD_SCALE = {expressway:0.45, highway:0.75, arterial:0.95, local:0.95};
+const ROUTE_TYPE = {
+  R001:"highway",R002:"arterial",R003:"arterial",R004:"arterial",R005:"highway",
+  R006:"highway",R007:"arterial",R008:"arterial",R009:"arterial",R010:"highway",
+  R011:"expressway",R012:"local",R013:"local",R014:"local",R015:"local",
+  R016:"expressway",R017:"arterial",R018:"arterial",R019:"local",R020:"local",
+  R021:"highway",R022:"highway",R023:"arterial",R024:"highway",R025:"highway"
+};
+
+// Deterministic "noise" — same location + hour always returns same value
+function stableNoise(seed, range) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  return ((Math.abs(h) % 1000) / 1000 - 0.5) * range;
+}
+
+function calcCongestion(loc, hour, dow, weatherCode = 0, hasEvent = false, horizonHours = 0) {
+  const targetHour = (hour + horizonHours) % 24;
+  const zone = loc.z;
+  const rid  = loc.rid || "R001";
+  const rtype = ROUTE_TYPE[rid] || "arterial";
+
+  const base   = HOURLY[targetHour] * (ROAD_SCALE[rtype] || 1.0);
+  const dayAdj = DAY_ADD[dow] || 0;
+  const zoneAdj = ZONE_ADD[zone] || 0;
+  const routeAdj = ROUTE_ADD[rid] || 0;
+  const weatherAdj = [0, 12, 28, 10][weatherCode] || 0;
+  const eventAdj = hasEvent && ["BKC","South Mumbai","Central Mumbai"].includes(zone) ? 28 : 0;
+
+  const noise = stableNoise(loc.n + targetHour + dow, 6);
+
+  const total = base + dayAdj + zoneAdj + routeAdj + weatherAdj + eventAdj + noise;
+  return Math.round(Math.min(97, Math.max(2, total)));
+}
+
+function congLevel(c) {
+  return c < 30 ? "LOW" : c < 55 ? "MODERATE" : c < 72 ? "HIGH" : "SEVERE";
+}
+
+const LC = { LOW:"var(--green)", MODERATE:"var(--yellow)", HIGH:"var(--orange)", SEVERE:"var(--red)" };
+
+// Generate 8-hour forecast for a location
+function forecastForLoc(loc, hour, dow) {
+  const labels = [], data = [];
+  for (let i = 0; i < 8; i++) {
+    const h = (hour + i) % 24;
+    const d = new Date(Date.now() + i * 3600000);
+    labels.push(`${(h % 12) || 12}${h < 12 ? "AM" : "PM"}`);
+    data.push(calcCongestion(loc, hour, dow, 0, false, i));
+  }
+  return { labels, data };
+}
+
+// All 25 route predictions
+const ALL_ROUTES_DATA = [
+  {id:"R001",n:"Western Express Hwy (Dahisar–Bandra)", z:"Western Suburbs",  rid:"R001", spd:60},
+  {id:"R002",n:"SV Road (Dahisar–Bandra)",             z:"Western Suburbs",  rid:"R002", spd:35},
+  {id:"R003",n:"Link Road (Malad–Andheri)",            z:"Western Suburbs",  rid:"R003", spd:30},
+  {id:"R004",n:"Andheri-Kurla Road",                   z:"Western Suburbs",  rid:"R004", spd:28},
+  {id:"R005",n:"JVLR (Jogeshwari–Vikhroli)",           z:"Central Connector",rid:"R005", spd:45},
+  {id:"R006",n:"Eastern Express Hwy (Thane–Sion)",     z:"Eastern Suburbs",  rid:"R006", spd:55},
+  {id:"R007",n:"LBS Marg (Thane–Kurla)",               z:"Eastern Suburbs",  rid:"R007", spd:32},
+  {id:"R008",n:"Ghodbunder Road (Thane)",              z:"Thane",            rid:"R008", spd:40},
+  {id:"R009",n:"Mulund-Airoli Road",                   z:"Eastern Suburbs",  rid:"R009", spd:38},
+  {id:"R010",n:"Sion-Panvel Highway",                  z:"Eastern Suburbs",  rid:"R010", spd:50},
+  {id:"R011",n:"Bandra-Worli Sea Link",                z:"Central Mumbai",   rid:"R011", spd:80},
+  {id:"R012",n:"Western Railway Road (Dadar)",         z:"Central Mumbai",   rid:"R012", spd:25},
+  {id:"R013",n:"Dr Ambedkar Road (Dadar–Parel)",       z:"Central Mumbai",   rid:"R013", spd:22},
+  {id:"R014",n:"BKC Internal Roads",                   z:"BKC",              rid:"R014", spd:20},
+  {id:"R015",n:"Kurla-Chembur Road",                   z:"Eastern Suburbs",  rid:"R015", spd:26},
+  {id:"R016",n:"Eastern Freeway (Chembur–Fort)",       z:"South Mumbai",     rid:"R016", spd:70},
+  {id:"R017",n:"Marine Drive",                         z:"South Mumbai",     rid:"R017", spd:45},
+  {id:"R018",n:"P D Mello Road (Masjid–Sion)",        z:"South Mumbai",     rid:"R018", spd:30},
+  {id:"R019",n:"Peddar Road (Kemps Corner–Worli)",     z:"South Mumbai",     rid:"R019", spd:24},
+  {id:"R020",n:"SG Barve Marg (Churchgate–CST)",      z:"South Mumbai",     rid:"R020", spd:18},
+  {id:"R021",n:"Palm Beach Road (Vashi–Belapur)",      z:"Navi Mumbai",      rid:"R021", spd:65},
+  {id:"R022",n:"Trans-Harbour Link Approach",          z:"Navi Mumbai",      rid:"R022", spd:55},
+  {id:"R023",n:"Thane-Belapur Road",                   z:"Navi Mumbai",      rid:"R023", spd:42},
+  {id:"R024",n:"Khopoli Road (Panvel)",                z:"Outskirts",        rid:"R024", spd:58},
+  {id:"R025",n:"Airoli Bridge (Thane–Navi Mumbai)",    z:"Navi Mumbai",      rid:"R025", spd:50},
+];
+
+function getRoutesCongestion(hour, dow, weatherCode = 0) {
+  return ALL_ROUTES_DATA.map(r => {
+    const fakeLoc = { n: r.id, z: r.z, rid: r.id };
+    const c = calcCongestion(fakeLoc, hour, dow, weatherCode);
+    const spd = Math.max(2, Math.round(r.spd * (1 - c / 100 * 0.82)));
+    return { ...r, congestion_pct: c, level: congLevel(c), speed_kmh: spd };
+  }).sort((a, b) => b.congestion_pct - a.congestion_pct);
+}
+
+function getZoneSummary(hour, dow, weatherCode = 0) {
+  const zones = {};
+  getRoutesCongestion(hour, dow, weatherCode).forEach(r => {
+    (zones[r.z] = zones[r.z] || []).push(r.congestion_pct);
+  });
+  return Object.entries(zones).map(([zone, vals]) => {
+    const avg = Math.round(vals.reduce((a, b) => a + b) / vals.length);
+    return { zone, avg_congestion: avg, level: congLevel(avg), route_count: vals.length, worst: Math.max(...vals), best: Math.min(...vals) };
+  }).sort((a, b) => b.avg_congestion - a.avg_congestion);
+}
+
+// Parking prediction — deterministic per location + time
+function parkingForLoc(loc, hour, dow, hasEvent = false, maxWalkKm = 1.5) {
+  const ZONE_DEMAND = { BKC:0.90, "South Mumbai":0.85, "Central Mumbai":0.78, "Western Suburbs":0.65, "Eastern Suburbs":0.60, Thane:0.55, "Navi Mumbai":0.38, Outskirts:0.22 };
+  const demand = (ZONE_DEMAND[loc.z] || 0.60) * (HOURLY[hour] / 100) * (DAY_ADD[dow] >= 0 ? 1.1 : 0.7);
+  const eventMult = hasEvent ? 1.4 : 1.0;
+
+  // Generate realistic lots based on zone
+  const lotTemplates = [
+    { name: `${loc.n} Parking Lot 1`,       dmult: 1.0,  walkMin: 2,  distKm: 0.15 },
+    { name: `${loc.n} Parking Lot 2`,       dmult: 0.85, walkMin: 5,  distKm: 0.40 },
+    { name: `${loc.n} Street Parking`,      dmult: 1.3,  walkMin: 3,  distKm: 0.25 },
+    { name: `${loc.z} Community Parking`,   dmult: 0.70, walkMin: 8,  distKm: 0.65 },
+    { name: `Nearest Mall Parking`,         dmult: 0.55, walkMin: 12, distKm: 0.85 },
+    { name: `Municipal Parking — ${loc.n}`, dmult: 0.80, walkMin: 7,  distKm: 0.55 },
+  ].filter(l => l.distKm <= maxWalkKm + 0.5);
+
+  const lots = lotTemplates.map(t => {
+    const occ = Math.min(0.97, demand * t.dmult * eventMult);
+    const avail = Math.round(Math.max(3, (1 - occ) * 100 + stableNoise(loc.n + t.name + hour, 8)));
+    const status = avail >= 40 ? "AVAILABLE" : avail >= 15 ? "LIMITED" : "FULL";
+    return { name: t.name, availability_pct: avail, walk_minutes: t.walkMin, distance_km: t.distKm, zone: loc.z, status };
+  }).sort((a, b) => b.availability_pct - a.availability_pct);
+
+  return { primary: lots[0], alternatives: lots.slice(1, 4), all_nearby: lots, total_found: lots.length, search_radius: maxWalkKm };
+}
+
+// Departure plan — deterministic per location pair
+function departurePlan(origLoc, destLoc, arrHour, distKm, hasEvent) {
+  const now = new Date();
+  const wc  = S.weather?.weather_code || 0;
+  const fmt = (d) => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const BASE_SPEED = 45; // km/h — realistic Mumbai average
+
+  // Build arrival target (push to tomorrow if already passed today)
+  const arrTarget = new Date(now);
+  arrTarget.setHours(arrHour, 0, 0, 0);
+  if (arrTarget <= now) arrTarget.setDate(arrTarget.getDate() + 1);
+
+  // Step 1: rough travel time at the arrival hour
+  const roughCong  = calcCongestion(origLoc, arrHour, arrTarget.getDay(), wc, hasEvent);
+  const roughSpeed = Math.max(12, BASE_SPEED * (1 - roughCong / 100 * 0.55));
+  const roughTravel= Math.round((distKm / roughSpeed) * 60);
+
+  // Step 2: ideal departure = arrival − travel time
+  const idealDepart = new Date(arrTarget.getTime() - roughTravel * 60000);
+
+  // Step 3: 12 windows centred around ideal departure
+  // Only clamp to now if ideal departure itself is in the past
+  const TOTAL = 12; const half = Math.floor(TOTAL / 2);
+  let winStart = new Date(idealDepart.getTime() - half * 15 * 60000);
+  if (idealDepart < now) winStart = new Date(now);
+
+  const windows = [];
+  for (let i = 0; i < TOTAL; i++) {
+    const depDate    = new Date(winStart.getTime() + i * 15 * 60000);
+    const depHour    = depDate.getHours();
+    const depDow     = depDate.getDay();
+    const congestion = calcCongestion(origLoc, depHour, depDow, wc, hasEvent);
+    const adjSpeed   = Math.max(12, BASE_SPEED * (1 - congestion / 100 * 0.55));
+    const baseMin    = Math.round(distKm / BASE_SPEED * 60);
+    const travelMin  = Math.round((distKm / adjSpeed) * 60);
+    const delayMin   = Math.max(0, travelMin - baseMin);
+    const etaDate    = new Date(depDate.getTime() + travelMin * 60000);
+    const minsEarly  = (arrTarget - etaDate) / 60000;
+    const cScore     = (1 - congestion / 100) * 45;
+    const tScore     = Math.max(0, (1 - (travelMin / Math.max(baseMin, 1) - 1) / 1.5)) * 35;
+    const score      = Math.round(cScore + tScore + 15);
+    windows.push({
+      rank: 0, depart_time: fmt(depDate), eta: fmt(etaDate),
+      congestion_pct: congestion, congestion_level: congLevel(congestion),
+      travel_minutes: travelMin, delay_minutes: delayMin,
+      confidence: Math.min(95, Math.max(50, score)), score,
+      minutes_early: Math.round(minsEarly),
+      label: minsEarly < -5 ? "LATE" : score >= 75 ? "BEST" : score >= 60 ? "GOOD" : score >= 45 ? "OK" : "AVOID"
+    });
+  }
+  windows.sort((a, b) => b.score - a.score);
+  windows.forEach((w, i) => w.rank = i + 1);
+  return { recommendations: windows.slice(0, 3), all_windows: windows, origin: origLoc.n, destination: destLoc.n, distance_km: distKm };
+}
+
+// ════════════════════════════════════════════════════════════════
+// CHART MANAGER — prevents stale chart objects
+// ════════════════════════════════════════════════════════════════
+const CHARTS = {};
+function drawChart(id, labels, data, horizontal = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; }
+  const colors = data.map(v => v < 30 ? "rgba(72,187,120,.75)" : v < 55 ? "rgba(246,224,94,.75)" : v < 72 ? "rgba(237,137,54,.75)" : "rgba(252,129,129,.75)");
+  CHARTS[id] = new Chart(el.getContext("2d"), {
+    type: "bar",
+    data: { labels, datasets: [{ data, borderRadius: 4, borderSkipped: false, backgroundColor: colors }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      indexAxis: horizontal ? "y" : "x",
+      scales: {
+        x: horizontal ? { min: 0, max: 100, grid: { color: "rgba(255,255,255,.03)" }, ticks: { color: "#718096", font: { size: 9 }, callback: v => v + "%" } }
+                      : { grid: { display: false }, ticks: { color: "#718096", font: { size: 9 } } },
+        y: horizontal ? { grid: { display: false }, ticks: { color: "#718096", font: { size: 9 } } }
+                      : { min: 0, max: 100, grid: { color: "rgba(255,255,255,.03)" }, ticks: { color: "#718096", font: { size: 9 }, callback: v => v + "%" } }
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// SHARED RENDERS
+// ════════════════════════════════════════════════════════════════
+function renderZoneGrid(id, zones) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = zones.map(z => `
+    <div class="zr ${z.level}">
+      <div><div class="zn">${z.zone}</div><div class="zs">${z.route_count} routes · worst ${z.worst}%</div></div>
+      <div class="zc ${z.level}">${z.avg_congestion}%</div>
+    </div>`).join("");
+}
+
+function renderDeparture(id, plan) {
+  const el = document.getElementById(id); if (!el) return;
+  const recs = plan.recommendations || [];
+  if (!recs.length) { el.innerHTML = `<div class="empty">No recommendations available</div>`; return; }
+  el.innerHTML = recs.map((r, i) => `
+    <div class="dc ${i === 0 ? "r1" : i === 1 ? "r2" : ""}">
+      <div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:1px">OPTION ${r.rank} ${r.label === "BEST" ? "⭐" : ""}</div>
+        <div class="dt">${r.depart_time}</div>
+        <div class="de">→ ETA ${r.eta} · ${r.travel_minutes}min travel</div>
+        <div class="dm">
+          <span class="tg ${r.label === "BEST" ? "best" : r.label === "LATE" ? "late" : ""}">${r.label}</span>
+          <span class="tg" style="color:${LC[r.congestion_level] || LC.HIGH}">${r.congestion_pct}% cong</span>
+          <span class="tg ${r.delay_minutes > 15 ? "warn" : ""}">${r.delay_minutes > 0 ? "+" + r.delay_minutes + "min delay" : "On time"}</span>
+        </div>
+      </div>
+      <div class="dconf"><div class="dnum">${r.confidence}%</div><div class="dlbl">CONFIDENCE</div></div>
+    </div>`).join("");
+}
+
+function renderParking(id, data) {
+  const el = document.getElementById(id); if (!el) return;
+  if (!data) { el.innerHTML = `<div class="empty">No parking data</div>`; return; }
+  const lots = [data.primary, ...(data.alternatives || [])].filter(Boolean);
+  el.innerHTML =
+    `<div style="font-size:10px;color:var(--muted);margin-bottom:7px">${data.total_found || lots.length} lots found within ${data.search_radius || 1.5}km</div>` +
+    lots.map((l, i) => `
+      <div class="pk ${i === 0 ? "pri" : ""}">
+        <div><div class="pn">${i === 0 ? "⭐ " : ""}${l.name}</div>
+        <div class="ps">${l.walk_minutes}min walk · ${l.distance_km}km · ${l.zone || ""}</div></div>
+        <div><div class="pa ${l.status}">${l.availability_pct}%</div>
+        <div class="pb ${l.status}">${l.status}</div></div>
+      </div>`).join("");
+}
+
+function renderInsight(origLoc, destLoc) {
+  const el = document.getElementById("inRes"); if (!el) return;
+  const hour = new Date().getHours();
+  const timeLabel = hour <= 10 ? "morning" : hour <= 14 ? "afternoon" : "evening";
+  const msgs = [
+    `Users commuting ${origLoc.n} → ${destLoc.n} save avg 16min by following the recommended departure vs ${timeLabel} peak.`,
+    `${destLoc.z} parking demand is ${["LOW","MODERATE","HIGH","VERY HIGH"][Math.floor(calcCongestion(destLoc, hour, new Date().getDay()) / 25)]} right now. Book a spot before you leave.`,
+    `Collaborative filtering: 9 similar commuters on this route prefer leaving 15min earlier on ${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][new Date().getDay()]}s.`,
+    `Your ${origLoc.z} → ${destLoc.z} route has ${calcCongestion(origLoc, hour, new Date().getDay()) > 70 ? "heavy" : "moderate"} congestion. Best alternate: change departure by ±20min.`,
+  ];
+  const msgIdx = Math.abs(stableNoise(origLoc.n + destLoc.n, 1000)) % msgs.length | 0;
+  el.innerHTML = `<div class="ib"><div class="il">🧠 COLLABORATIVE FILTERING · AI PERSONALIZATION</div>${msgs[msgIdx]}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// TAB: PLAN TRIP
+// ════════════════════════════════════════════════════════════════
+function renderPlanTab() {
+  document.getElementById("sb").innerHTML = `
+    <div id="wbar" class="ws">
+      <div style="font-size:18px">🌤️</div>
+      <div><div style="font-size:12px;font-weight:600">Loading weather...</div>
+           <div style="font-size:10px;color:var(--muted)">OpenWeatherMap · Mumbai</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Plan My Trip</div>
+      <div class="fr"><label>📍 From</label>${locSelect("oSel", "Andheri Station West", true)}</div>
+      <div class="fr"><label>📍 To</label>${locSelect("dSel", "BKC", true)}</div>
+      <div style="display:flex;align-items:center;gap:10px;background:#1a2a1a;border-radius:8px;padding:9px 14px;font-size:13px;margin-bottom:4px;">
+        <span style="font-size:18px">📏</span>
+        <span id="distText" style="color:#888">Select origin & destination to see distance</span>
+      </div>
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:4px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:#8b949e;text-transform:uppercase;margin-bottom:8px;">Arrive by</label>
+        <div class="time-picker" style="width:100%;">
+          <input type="number" id="aH" min="1" max="12" value="9"
+                 oninput="clampTime('aH',1,12)"
+                 placeholder="HH" title="Hour (1–12)"
+                 style="flex:1;width:auto;font-size:15px;font-weight:700;padding:8px 0;text-align:center;">
+          <span class="sep" style="font-size:22px;padding:0 2px;">:</span>
+          <input type="number" id="aM" min="0" max="59" value="0"
+                 oninput="clampTime('aM',0,59)"
+                 placeholder="MM" title="Minutes (00–59)"
+                 style="flex:1;width:auto;font-size:15px;font-weight:700;padding:8px 0;text-align:center;">
+          <select class="ampm" id="aAmPm"
+                  style="flex:1;width:auto;font-size:14px;font-weight:700;padding:8px 4px;text-align:center;">
+            <option value="AM">AM</option>
+            <option value="PM" selected>PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="evCk" style="width:auto">
+        <label style="margin:0;cursor:pointer" for="evCk">Major event today (IPL/concert)</label>
+      </div>
+      <button class="btn" id="pBtn" onclick="runPlan()">⚡ Plan My Trip</button>
+    </div>
+    <div class="card">
+      <div class="ct">Departure Recommendations</div>
+      <div id="depRes"><div class="empty"><div class="ei">🚦</div>Select locations above &amp; click Plan</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">AI Personalization</div>
+      <div id="inRes"><div class="empty" style="padding:12px"><div class="ei">🧠</div>Plan a trip for insights</div></div>
+    </div>`;
+
+  document.getElementById("mn").innerHTML = `
+    <div class="sr">
+      <div class="sc"><div class="sv" id="sc1">--</div><div class="sl">Avg Congestion Mumbai</div></div>
+      <div class="sc"><div class="sv">25</div><div class="sl">Routes Monitored</div></div>
+      <div class="sc"><div class="sv" id="sc3">--</div><div class="sl">Parking at Destination</div></div>
+      <div class="sc"><div class="sv" id="sc4">--</div><div class="sl">Best Depart Window</div></div>
+    </div>
+    <div class="tc">
+      <div class="card">
+        <div class="ct" id="chartTitle">7-Hour Forecast · Route</div>
+        <div class="cw"><canvas id="fChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ct">Mumbai Zone Status · Live</div>
+        <div id="zGrid"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">🅿️ Parking Intelligence · Near Destination</div>
+      <div id="pkRes"><div class="empty"><div class="ei">🅿️</div>Plan a trip to see parking predictions</div></div>
+    </div>`;
+
+  loadWeather();
+  loadZoneGrid();
+  setTimeout(updateDistanceBanner, 0);
+  loadDefaultForecast();
+}
+
+function loadDefaultForecast() {
+  const now = new Date();
+  const loc = getLoc("oSel") || LOCS[0];
+  const f = forecastForLoc(loc, now.getHours(), now.getDay());
+  drawChart("fChart", f.labels, f.data);
+  updateZoneStat();
+}
+
+function updateZoneStat() {
+  const now = new Date();
+  const zones = getZoneSummary(now.getHours(), now.getDay());
+  const avg = Math.round(zones.reduce((s, z) => s + z.avg_congestion, 0) / zones.length);
+  const el = document.getElementById("sc1");
+  if (el) { el.textContent = avg + "%"; el.style.color = LC[congLevel(avg)]; }
+}
+
+async function loadWeather() {
+  // Try API first, fall back to default
+  const d = (await api("/api/weather")) || {
+    condition: "Clear", weather_code: 0, temp_c: 32, humidity_pct: 70,
+    wind_kmh: 14, rain_1h_mm: 0, source: "demo"
+  };
+  S.weather = d;
+  const icons = ["☀️", "🌧️", "⛈️", "🌫️"];
+  const iColors = ["var(--green)", "var(--yellow)", "var(--red)", "var(--muted)"];
+  const impacts = ["No congestion impact", "Rain: +12% congestion", "Storm: +28% congestion", "Fog: +10% congestion"];
+  const el = document.getElementById("wbar");
+  if (el) el.innerHTML = `
+    <div style="font-size:18px">${icons[d.weather_code] || "☀️"}</div>
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:600">${d.condition} · ${d.temp_c}°C · ${d.humidity_pct}% humidity</div>
+      <div style="font-size:10px;color:var(--muted)">${d.wind_kmh}km/h · rain:${d.rain_1h_mm}mm · ${d.source}</div>
+    </div>
+    <div style="font-size:10px;color:${iColors[d.weather_code]};text-align:right">${impacts[d.weather_code]}</div>`;
+}
+
+function loadZoneGrid() {
+  const now = new Date();
+  // Use API if available, else compute locally
+  (async () => {
+    const data = await api("/api/forecast/zones");
+    const zones = data?.zones || getZoneSummary(now.getHours(), now.getDay());
+    renderZoneGrid("zGrid", zones);
+    const avg = Math.round(zones.reduce((s, z) => s + z.avg_congestion, 0) / zones.length);
+    const el = document.getElementById("sc1");
+    if (el) { el.textContent = avg + "%"; el.style.color = LC[congLevel(avg)]; }
+  })();
+}
+
+// ── Time-picker helpers ────────────────────────────────────────────
+function clampTime(id, min, max) {
+  const el = document.getElementById(id);
+  let v = parseInt(el.value);
+  if (isNaN(v)) return;
+  if (v < min) el.value = min;
+  if (v > max) el.value = max;
+}
+
+// Read the manual time picker → returns { hour24, minute }
+// hour24 is 0–23 (what the API expects)
+function getArrival24h(hId, mId, ampmId) {
+  let h  = parseInt(document.getElementById(hId).value)  || 9;
+  let m  = parseInt(document.getElementById(mId).value)  || 0;
+  const ampm = document.getElementById(ampmId).value;
+  h = Math.min(12, Math.max(1, h));
+  m = Math.min(59, Math.max(0, m));
+  if (ampm === "AM") {
+    if (h === 12) h = 0;          // 12:xx AM → 0:xx
+  } else {
+    if (h !== 12) h = h + 12;    // 1–11 PM → 13–23; 12 PM stays 12
+  }
+  return { hour24: h, minute: m };
+}
+
+async function runPlan() {
+  const btn = document.getElementById("pBtn");
+  const origLoc = getLoc("oSel");
+  const destLoc = getLoc("dSel");
+  const { hour24, minute: arrMin } = getArrival24h("aH", "aM", "aAmPm");
+  const hour = hour24;
+  // Auto-calculate road distance from coordinates (×1.15 Mumbai road factor)
+  const _straight = haversineKm(origLoc.la, origLoc.lo, destLoc.la, destLoc.lo);
+  const dist      = parseFloat((_straight * 1.15).toFixed(1));
+  const hasEvent = document.getElementById("evCk").checked;
+
+  if (!origLoc || !destLoc) return;
+
+  btn.textContent = "Planning..."; btn.classList.add("loading");
+
+  try {
+    // Always compute locally first (instant, deterministic)
+    let plan = departurePlan(origLoc, destLoc, hour, dist, hasEvent, arrMin);
+    let parking = parkingForLoc(destLoc, hour, new Date().getDay(), hasEvent, 1.5);
+
+    // If API is online, try to get server predictions (more accurate)
+    if (S.apiOnline) {
+      const [apiPlan, apiParking] = await Promise.all([
+        api("/api/departure/plan", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            origin: origLoc.n, destination: destLoc.n,
+            origin_lat: origLoc.la, origin_lng: origLoc.lo,
+            dest_lat: destLoc.la, dest_lng: destLoc.lo,
+            arrival_hour: hour, arrival_minute: arrMin,
+            distance_km: dist, has_event: hasEvent
+          })
+        }),
+        api("/api/parking/predict", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dest_lat: destLoc.la, dest_lng: destLoc.lo,
+            arrival_hour: hour, arrival_min: arrMin,
+            weather_code: S.weather?.weather_code || 0,
+            has_event: hasEvent, max_walk_km: 1.5
+          })
+        })
+      ]);
+      if (apiPlan?.recommendations?.length) plan = apiPlan;
+      if (apiParking?.primary)              parking = apiParking;
+    }
+
+    // ── Update UI ────────────────────────────────────
+    renderDeparture("depRes", plan);
+    renderInsight(origLoc, destLoc);
+    renderParking("pkRes", parking);
+
+    // Update forecast chart for origin location
+    const now = new Date();
+    const f = forecastForLoc(origLoc, now.getHours(), now.getDay());
+    drawChart("fChart", f.labels, f.data);
+    const titleEl = document.getElementById("chartTitle");
+    if (titleEl) titleEl.textContent = `7-Hour Forecast · ${origLoc.n}`;
+
+    // Update stats
+    if (parking.primary) {
+      const el = document.getElementById("sc3");
+      if (el) el.textContent = parking.primary.availability_pct + "%";
+    }
+    const bestDep = plan.recommendations?.[0];
+    if (bestDep) {
+      const el = document.getElementById("sc4");
+      if (el) el.textContent = bestDep.depart_time;
+    }
+
+  } catch (e) {
+    console.error("runPlan error:", e);
+    document.getElementById("depRes").innerHTML = `<div class="empty">❌ Error: ${e.message}</div>`;
+  }
+
+  btn.textContent = "⚡ Plan My Trip"; btn.classList.remove("loading");
+}
+
+// ════════════════════════════════════════════════════════════════
+// TAB: LIVE TRAFFIC
+// ════════════════════════════════════════════════════════════════
+function renderLiveTab() {
+  document.getElementById("sb").innerHTML = `
+    <div class="card">
+      <div class="ct">Check Any Location</div>
+      <div class="fr"><label>Select Location</label>${locSelect("llSel", "BKC")}</div>
+      <button class="btn" onclick="checkLoc()">🔍 Check Traffic Now</button>
+    </div>
+    <div id="locDetail" class="card">
+      <div class="ct">Location Details</div>
+      <div class="empty"><div class="ei">📍</div>Pick a location and click Check</div>
+    </div>
+    <div class="card">
+      <div class="ct">Zone Summary</div>
+      <div id="lzGrid"></div>
+    </div>`;
+
+  document.getElementById("mn").innerHTML = `
+    <div class="card">
+      <div class="ct">All 25 Mumbai Routes · Live Congestion</div>
+      <div class="sc2">
+        <table class="rt">
+          <thead><tr><th>ID</th><th>Route Name</th><th>Zone</th><th>Congestion</th><th>Speed</th><th>Level</th></tr></thead>
+          <tbody id="rtBody"><tr><td colspan="6" style="text-align:center;padding:16px"><div class="sp"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="card">
+        <div class="ct">Zone Congestion — Right Now</div>
+        <div style="height:240px"><canvas id="zBarChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ct">All-Day Pattern </div>
+        <div class="cw"><canvas id="allDayChart"></canvas></div>
+      </div>
+    </div>`;
+
+  loadAllRoutes();
+  loadZoneGrid_live();
+  loadZoneBarChart();
+  loadAllDayChart();
+}
+
+function loadAllRoutes() {
+  const now = new Date();
+  (async () => {
+    const data = await api("/api/forecast/all-routes");
+    const routes = data?.routes || getRoutesCongestion(now.getHours(), now.getDay());
+    const tbody = document.getElementById("rtBody"); if (!tbody) return;
+    tbody.innerHTML = routes.map(r => `
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${r.route_id || r.id}</td>
+        <td style="font-weight:600;font-size:11px">${r.name || r.n}</td>
+        <td style="font-size:10px;color:var(--muted)">${r.zone || r.z}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${LC[r.level]}">${r.congestion_pct}%</td>
+        <td style="font-size:11px;color:var(--muted)">${r.speed_kmh} km/h</td>
+        <td><span class="lb ${r.level}">${r.level}</span></td>
+      </tr>`).join("");
+  })();
+}
+
+function loadZoneGrid_live() {
+  const now = new Date();
+  (async () => {
+    const data = await api("/api/forecast/zones");
+    const zones = data?.zones || getZoneSummary(now.getHours(), now.getDay());
+    renderZoneGrid("lzGrid", zones);
+  })();
+}
+
+function loadZoneBarChart() {
+  const now = new Date();
+  (async () => {
+    const data = await api("/api/forecast/zones");
+    const zones = data?.zones || getZoneSummary(now.getHours(), now.getDay());
+    drawChart("zBarChart",
+      zones.map(z => z.zone.replace(" Suburbs", "").replace(" Mumbai", "")),
+      zones.map(z => z.avg_congestion),
+      true
+    );
+  })();
+}
+
+function loadAllDayChart() {
+  // Show 24-hour pattern for R001 (WEH)
+  const loc = { n: "R001", z: "Western Suburbs", rid: "R001" };
+  const labels = [], data = [];
+  for (let h = 0; h < 24; h++) {
+    labels.push(`${(h % 12) || 12}${h < 12 ? "a" : "p"}`);
+    data.push(calcCongestion(loc, h, 1)); // Tuesday baseline
+  }
+  drawChart("allDayChart", labels, data);
+}
+
+async function checkLoc() {
+  const loc = getLoc("llSel");
+  const now = new Date();
+
+  let cong, nearRoutes;
+
+  if (S.apiOnline) {
+    const data = await api(`/api/forecast/by-location?lat=${loc.la}&lng=${loc.lo}`);
+    if (data) {
+      cong = data.area_congestion;
+      nearRoutes = data.nearest_routes?.map(r => ({
+        name: r.route_name, cong: r.current?.congestion_pct, level: r.current?.level
+      }));
+    }
+  }
+
+  // Compute locally if API failed
+  if (!cong) {
+    cong = calcCongestion(loc, now.getHours(), now.getDay());
+    nearRoutes = null;
+  }
+  const level = congLevel(cong);
+
+  // Also update forecast chart for this location
+  const f = forecastForLoc(loc, now.getHours(), now.getDay());
+  drawChart("allDayChart", f.labels, f.data);
+
+  document.getElementById("locDetail").innerHTML = `
+    <div class="ct">${loc.n}</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px">📍 ${loc.la.toFixed(4)}, ${loc.lo.toFixed(4)} · ${loc.z}</div>
+    <div style="font-size:32px;font-family:'JetBrains Mono',monospace;font-weight:700;color:${LC[level]}">${cong}%</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${level} CONGESTION RIGHT NOW</div>
+    <hr class="divider">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:6px">FORECAST</div>
+    ${[1, 3, 6].map(h => {
+      const fc = calcCongestion(loc, now.getHours(), now.getDay(), 0, false, h);
+      return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted)">+${h}h</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:${LC[congLevel(fc)]}">${fc}% ${congLevel(fc)}</span>
+      </div>`;
+    }).join("")}
+    ${nearRoutes ? `
+    <hr class="divider">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:6px">NEARBY ROUTES (API)</div>
+    ${nearRoutes.slice(0, 3).map(r =>
+      `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--border)">
+        <span style="flex:1;overflow:hidden">${r.name?.substring(0, 26)}</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:${LC[r.level]}">${r.cong}%</span>
+      </div>`).join("")}` : ""}`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// TAB: PARKING
+// ════════════════════════════════════════════════════════════════
+function renderParkingTab() {
+  document.getElementById("sb").innerHTML = `
+    <div class="card">
+      <div class="ct">Find Parking Near</div>
+      <div class="fr"><label>Destination</label>${locSelect("pkSel", "BKC")}</div>
+      <div class="fg">
+        <div>
+          <label>Arrival time</label>
+          <div class="time-picker">
+            <input type="number" id="pkH" min="1" max="12" value="9"
+                   oninput="clampTime('pkH',1,12)"
+                   placeholder="HH" title="Hour (1–12)">
+            <span class="sep">:</span>
+            <input type="number" id="pkM" min="0" max="59" value="0"
+                   oninput="clampTime('pkM',0,59)"
+                   placeholder="MM" title="Minutes (00–59)">
+            <select class="ampm" id="pkAmPm">
+              <option value="AM">AM</option>
+              <option value="PM" selected>PM</option>
+            </select>
+          </div>
+        </div>
+        <div><label>Max walk (km)</label><input id="pkW" type="number" value="1.5" min="0.3" max="3" step="0.1"></div>
+      </div>
+      <div class="fr" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="pkEv" style="width:auto">
+        <label style="margin:0;cursor:pointer" for="pkEv">Event day (higher demand)</label>
+      </div>
+      <button class="btn" onclick="findParking()">🅿️ Find Parking</button>
+    </div>
+    <div id="pkSide"><div class="empty" style="padding:14px"><div class="ei">🅿️</div>Search to see top result</div></div>`;
+
+  document.getElementById("mn").innerHTML = `
+    <div class="sr">
+      <div class="sc"><div class="sv">50</div><div class="sl">Lots in Database</div></div>
+      <div class="sc"><div class="sv" id="pk1">--</div><div class="sl">Found Near Dest</div></div>
+      <div class="sc"><div class="sv" id="pk2">--</div><div class="sl">Best Availability</div></div>
+      <div class="sc"><div class="sv" id="pk3">--</div><div class="sl">Closest Walk</div></div>
+    </div>
+    <div class="card">
+      <div class="ct" id="pkTitle">All Parking Lots · Near Destination</div>
+      <div id="pkMain"><div class="empty"><div class="ei">🗺️</div>Select a destination and click Find Parking</div></div>
+    </div>
+    <div class="tc">
+      <div class="card">
+        <div class="ct">Normal Day vs Event Day </div>
+        <div id="evComp"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Availability by Hour</div>
+        <div class="cw"><canvas id="pkHourChart"></canvas></div>
+      </div>
+    </div>`;
+
+  loadEventComparison();
+  loadParkingHourChart();
+}
+
+async function findParking() {
+  const destLoc = getLoc("pkSel");
+  const { hour24: pkHour24, minute: pkMin } = getArrival24h("pkH", "pkM", "pkAmPm");
+  const hour = pkHour24;
+  const maxWalk = parseFloat(document.getElementById("pkW").value) || 1.5;
+  const hasEv   = document.getElementById("pkEv").checked;
+  const dow     = new Date().getDay();
+
+  // Compute locally immediately
+  let data = parkingForLoc(destLoc, hour, dow, hasEv, maxWalk);
+
+  // Try API
+  if (S.apiOnline) {
+    const apiData = await api("/api/parking/predict", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dest_lat: destLoc.la, dest_lng: destLoc.lo,
+        arrival_hour: hour, arrival_min: pkMin,
+        weather_code: S.weather?.weather_code || 0,
+        has_event: hasEv, max_walk_km: maxWalk
+      })
+    });
+    if (apiData?.primary) data = apiData;
+  }
+
+  // Update stats
+  const lots = [data.primary, ...(data.alternatives || [])].filter(Boolean);
+  document.getElementById("pk1").textContent = data.total_found || lots.length;
+  const best   = lots.reduce((a, b) => a.availability_pct > b.availability_pct ? a : b, lots[0]);
+  const nearest = lots.reduce((a, b) => a.walk_minutes < b.walk_minutes ? a : b, lots[0]);
+  document.getElementById("pk2").textContent = (best?.availability_pct || "--") + "%";
+  document.getElementById("pk3").textContent = (nearest?.walk_minutes || "--") + "min";
+
+  const titleEl = document.getElementById("pkTitle");
+  if (titleEl) titleEl.textContent = `Parking Near ${destLoc.n} · ${lots.length} lots found`;
+
+  renderParking("pkMain", data);
+
+  // Update sidebar with best option
+  document.getElementById("pkSide").innerHTML = data.primary ? `
+    <div class="card">
+      <div class="ct">Best Option</div>
+      <div style="font-size:30px;font-family:'JetBrains Mono',monospace;font-weight:700;color:${data.primary.status==="AVAILABLE"?"var(--green)":data.primary.status==="LIMITED"?"var(--yellow)":"var(--red)"}">
+        ${data.primary.availability_pct}%</div>
+      <div style="font-size:13px;font-weight:600;margin:4px 0">${data.primary.name}</div>
+      <div style="font-size:11px;color:var(--muted)">${data.primary.walk_minutes}min walk · ${data.primary.distance_km}km away</div>
+      <div style="font-size:11px;margin-top:6px;color:${data.primary.status==="AVAILABLE"?"var(--green)":data.primary.status==="LIMITED"?"var(--yellow)":"var(--red)"};font-weight:600">${data.primary.status}</div>
+    </div>` : `<div class="empty">No lots found — increase max walk distance</div>`;
+
+  // Update hourly chart for this location
+  loadParkingHourChart(destLoc);
+}
+
+function loadEventComparison() {
+  const bkc = LOCS.find(l => l.n === "BKC");
+  const dow = new Date().getDay();
+  const items = [
+    { n: "BKC Lot 1",   normal: parkingForLoc(bkc, 19, dow, false).primary?.availability_pct, event: parkingForLoc(bkc, 19, dow, true).primary?.availability_pct },
+    { n: "BKC Lot 2",   normal: parkingForLoc(bkc, 19, dow, false).alternatives?.[0]?.availability_pct, event: parkingForLoc(bkc, 19, dow, true).alternatives?.[0]?.availability_pct },
+    { n: "MMRDA Area",  normal: 55, event: 12 },
+    { n: "Bandra Stn",  normal: 44, event: 20 },
+  ].filter(i => i.normal !== undefined);
+
+  document.getElementById("evComp").innerHTML = items.map(i => `
+    <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:600">${i.n}</div>
+      <div style="text-align:center">
+        <div style="font-size:17px;font-family:'JetBrains Mono',monospace;color:var(--green)">${i.normal}%</div>
+        <div style="font-size:9px;color:var(--muted)">NORMAL</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:17px;font-family:'JetBrains Mono',monospace;color:var(--red)">${i.event}%</div>
+        <div style="font-size:9px;color:var(--muted)">IPL DAY</div>
+      </div>
+    </div>`).join("");
+}
+
+function loadParkingHourChart(loc) {
+  const targetLoc = loc || LOCS.find(l => l.n === "BKC");
+  const dow = new Date().getDay();
+  const labels = [], data = [];
+  for (let h = 6; h <= 22; h++) {
+    const pk = parkingForLoc(targetLoc, h, dow, false);
+    labels.push(`${h > 12 ? h - 12 : h}${h < 12 ? "AM" : "PM"}`);
+    data.push(pk.primary?.availability_pct || 50);
+  }
+  drawChart("pkHourChart", labels, data);
+}
+
+// ════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  S.currentTab = tab;
+  document.querySelectorAll(".tab").forEach((el, i) => {
+    el.classList.toggle("active", ["plan", "live", "park"][i] === tab);
+  });
+  Object.values(CHARTS).forEach(c => { try { c.destroy(); } catch {} });
+  for (const k in CHARTS) delete CHARTS[k];
+  if (tab === "plan") renderPlanTab();
+  if (tab === "live") renderLiveTab();
+  if (tab === "park") renderParkingTab();
+}
+
+// ════════════════════════════════════════════════════════════════
+// INIT — detect backend FIRST, then render
+// ════════════════════════════════════════════════════════════════
+detectBackend().then(() => renderPlanTab());
+</script>
+</body>
+</html>
