@@ -56,47 +56,23 @@ UrbanNav AI is a full-stack predictive mobility platform with four integrated mo
 
 ---
 
-
+## Screenshots
 
 ### Plan Trip — Departure Recommendations
 
-<!-- After saving your screenshot, replace the block below with:
-![Plan Trip Tab](docs/screenshots/plan-trip.png)
--->
-
-```
-screenshots/plan-trip.png
-```
+![Plan Trip Tab](screenshots/plan-trip.png)
 
 ### 7-Hour Traffic Forecast
 
-<!-- After saving your screenshot, replace the block below with:
-![Forecast Chart](docs/screenshots/forecast-chart.png)
--->
-
-```
-screenshots/forecast-chart.png
-```
+![Forecast Chart](screenshots/forecast-chart.png)
 
 ### Live Traffic — All 25 Routes
 
-<!-- After saving your screenshot, replace the block below with:
-![Live Traffic Tab](docs/screenshots/live-traffic.png)
--->
-
-```
-screenshots/live-traffic.png
-```
+![Live Traffic Tab](screenshots/live-traffic.png)
 
 ### Parking Intelligence
 
-<!-- After saving your screenshot, replace the block below with:
-![Parking Tab](docs/screenshots/parking.png)
--->
-
-```
-screenshots/parking.png
-```
+![Parking Tab](screenshots/parking.png)
 
 ---
 
@@ -465,6 +441,8 @@ urban_nav/
 |-- .env                              API keys (OpenWeather, TomTom)
 |-- README.md
 |
+|-- screenshots/                      dashboard screenshots (referenced in README)
+|
 |-- data/
 |   |-- generate_synthetic_data.py    generates 36,000-record Mumbai dataset
 |   `-- processed/
@@ -489,15 +467,8 @@ urban_nav/
 |       |-- weather_service.py        OpenWeatherMap API integration
 |       `-- tomtom_collector.py       optional live traffic data collector
 |
-|-- frontend/
-|   `-- index.html                    complete single-file dashboard
-|
-`-- docs/
-    `-- screenshots/                  add your screenshots here for the README
-        |-- plan-trip.png
-        |-- forecast-chart.png
-        |-- live-traffic.png
-        `-- parking.png
+`-- frontend/
+    `-- index.html                    complete single-file dashboard
 ```
 
 ---
