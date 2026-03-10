@@ -60,7 +60,7 @@ UrbanNav AI is a full-stack predictive mobility platform with four integrated mo
 
 ### Plan Trip — Departure Recommendations
 
-![Plan Trip Tab](screenshots/plan-trip.png)
+![Plan Trip Tab](screenshots/plan-trip(1).png)
 
 ### 7-Hour Traffic Forecast
 
