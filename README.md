@@ -12,8 +12,6 @@ Built at HORIZON 1.0 — VCET, Vasai Road
 
 </div>
 
-## Live Demo
-https://jaggu04.github.io/TeamAjinkya_AIML_HORIZON26/
 ---
 
 ## Table of Contents
@@ -62,7 +60,7 @@ UrbanNav AI is a full-stack predictive mobility platform with four integrated mo
 
 ### Plan Trip — Departure Recommendations
 
-![Plan Trip Tab](screenshots/plan-trip(1).png)
+![Plan Trip Tab](screenshots/plan-trip.png)
 
 ### 7-Hour Traffic Forecast
 
@@ -262,17 +260,21 @@ Loads saved PyTorch model and StandardScaler, feeds 24-hour sequence, outputs +1
 
 ### Model Inventory
 
-| # | Model | File | Type | Purpose |
-|---|---|---|---|---|
-| 1 | LSTM Neural Network | `lstm_traffic.py` | PyTorch (trained) | Multi-horizon traffic congestion forecasting |
-| 2 | Statistical Additive Predictor | `predictor.py` | Rule-based statistical | Real-time congestion for any route, time, and condition |
-| 3 | Statistical Parking Predictor | `parking_intelligence.py` | Rule-based statistical | Parking availability across 50 lots |
-| 4 | Departure Window Scorer | `departure_planner.py` | Scoring + normalisation | Rank 18 departure windows by congestion and arrival timing |
-| 5 | Collaborative Filter | `personalization.py` | Cosine similarity | User personalization from trip history |
+| # | Model | File | Type | Training Origin | Purpose |
+|---|---|---|---|---|---|
+| 1 | LSTM Neural Network | `lstm_traffic.py` | PyTorch | Trained from scratch on synthetic Mumbai data | Multi-horizon traffic congestion forecasting |
+| 2 | Statistical Additive Predictor | `predictor.py` | Rule-based | No training — deterministic formula | Real-time congestion for any route, time, and condition |
+| 3 | Statistical Parking Predictor | `parking_intelligence.py` | Rule-based | No training — deterministic formula | Parking availability across 50 lots |
+| 4 | Departure Window Scorer | `departure_planner.py` | Scoring | No training — weighted scoring function | Rank 18 departure windows by congestion and arrival timing |
+| 5 | Collaborative Filter | `personalization.py` | Cosine similarity | No training — computed at query time from trip history | User personalization from trip history |
 
 ---
 
 ### Model 1 — LSTM Traffic Forecaster
+
+**Training origin: trained from scratch**
+
+No pretrained weights are used. The model is initialised with random weights and trained entirely on our synthetic Mumbai traffic dataset using `python -m backend.models.lstm_traffic`. The trained weights are saved to `backend/models/saved/lstm_traffic.pt`.
 
 **Architecture:**
 
@@ -307,8 +309,20 @@ Output     [congestion_+1h, congestion_+3h, congestion_+6h]
 | Learning rate | 0.001 |
 | Optimizer | Adam, weight_decay=1e-5 |
 | Loss function | HuberLoss |
-| LR Scheduler | ReduceLROnPlateau, patience=5 |
+| LR Scheduler | ReduceLROnPlateau, patience=3, factor=0.5 |
 | Train/Val split | 85% / 15%, time-based |
+
+**Evaluation metrics:**
+
+The training loop computes and prints MAE at each epoch using `sklearn.metrics.mean_absolute_error` on the validation set, separately for each horizon. The metric logged is:
+
+```
+MAE 1h: X.X   MAE 3h: X.X   MAE 6h: X.X
+```
+
+These are printed to the terminal during `python -m backend.models.lstm_traffic`. The values depend on the machine and the generated dataset — run the training script to see the actual numbers from your environment. The model checkpoint saved to `lstm_traffic.pt` corresponds to the epoch with the lowest validation HuberLoss.
+
+MAE here is in percentage points — a MAE of 10 means the prediction is off by 10 congestion percentage points on average. Because this is synthetic data, the model learns the patterns very well. Expect lower MAE at the 1-hour horizon and higher at 6 hours since uncertainty increases with distance.
 
 **Why LSTM:** Traffic is a time series where current congestion depends on the previous several hours. LSTM's gating mechanism (forget, input, output gates) learns which historical timesteps are relevant for each forecast horizon. A feedforward model treats each hour independently and misses these temporal patterns.
 
@@ -318,7 +332,9 @@ Output     [congestion_+1h, congestion_+3h, congestion_+6h]
 
 ### Model 2 — Statistical Additive Predictor
 
-Designed to work without any training step. Delivers deterministic, calibrated predictions at startup.
+**Training origin: no training, no model file**
+
+This is a hand-calibrated formula. There are no weights, no training data consumed, and no `.pt` or `.pkl` file generated. It runs at API startup immediately and is always available regardless of whether the LSTM has been trained.
 
 **Formula:**
 
@@ -338,6 +354,10 @@ congestion = clip(pct, 2, 97)
 ---
 
 ### Model 3 — Statistical Parking Predictor
+
+**Training origin: no training, no model file**
+
+Like Model 2, this is a calibrated formula with hardcoded multipliers — no sklearn, no `.pkl`, no training loop. The word "predictor" here means it produces a forward-looking estimate, not that it uses a trained ML model.
 
 **Occupancy formula:**
 
@@ -359,6 +379,10 @@ Lot types recognized: airport, mall, hospital, station, default.
 
 ### Model 4 — Departure Window Scorer
 
+**Training origin: no training**
+
+Pure algorithmic scoring. The weights (0.40 timing, 0.35 congestion, 0.25 delay) were manually set. No data was used to fit them.
+
 **Scoring formula per window:**
 
 ```
@@ -375,6 +399,10 @@ Normalisation maps the lowest-scoring window in the search to 52 and the best to
 
 ### Model 5 — Collaborative Filter
 
+**Training origin: no offline training — computed live from SQLite**
+
+There is no training phase. When `/api/users/{id}/similar` is called, the system reads all user trip records from SQLite, builds feature vectors on the fly, computes cosine similarity at query time, and returns the top matches. It improves automatically as more trips are logged — no retraining needed.
+
 **Method:** User-User Cosine Similarity
 
 **Feature vector per user (6 dimensions):**
@@ -386,6 +414,41 @@ Normalisation maps the lowest-scoring window in the search to 52 and the best to
 ```
 
 Users with cosine similarity above 0.7 are surfaced as similar commuters. Their preferred departure times and routes are used to generate personalized suggestions for new users on the same corridor.
+
+---
+
+## Evaluation
+
+### What is measured and what is not
+
+Only the LSTM (Model 1) has a formal training loop with computed metrics. The other four models are either rule-based formulas or a live similarity computation — there are no train/test splits, no loss functions, and no numeric evaluation metrics for them.
+
+### LSTM — metrics computed during training
+
+The training script (`lstm_traffic.py`) computes these on the validation set at every epoch:
+
+| Metric | What it measures | Where it is computed |
+|---|---|---|
+| HuberLoss (val) | Overall validation loss, used for model checkpointing | `criterion(pred, yb)` in the training loop |
+| MAE 1h | Mean absolute error for the +1 hour forecast, in congestion percentage points | `mean_absolute_error(trues[:, 0], preds[:, 0])` |
+| MAE 3h | Same for +3 hour forecast | `mean_absolute_error(trues[:, 1], preds[:, 1])` |
+| MAE 6h | Same for +6 hour forecast | `mean_absolute_error(trues[:, 2], preds[:, 2])` |
+
+These are printed to the terminal during training. To see the actual values from your environment, run:
+
+```bash
+python -m backend.models.lstm_traffic
+```
+
+The model saved to `lstm_traffic.pt` is the checkpoint from the epoch with the lowest `val_loss`, not necessarily the last epoch.
+
+### Why there are no pre-logged metric numbers in this README
+
+The metrics depend on the generated dataset, which uses a random seed and produces slightly different values each time it is generated. Putting fixed numbers here would mean they do not match what you see when you train. Run the training script and the terminal will print the actual MAE at each epoch.
+
+### What MAE means in this context
+
+MAE is in percentage points of congestion. A MAE of 8 at the 1-hour horizon means the model's prediction is off by 8 congestion percentage points on average. Since the target range is 2–97, an 8-point error is meaningful but not catastrophic — it correctly classifies the severity band (LOW / MODERATE / HIGH / SEVERE) in most cases.
 
 ---
 
