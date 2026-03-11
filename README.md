@@ -12,6 +12,8 @@ Built at HORIZON 1.0 — VCET, Vasai Road
 
 </div>
 
+## Live Demo
+https://jaggu04.github.io/TeamAjinkya_AIML_HORIZON26/
 ---
 
 ## Table of Contents
